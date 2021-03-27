@@ -1,0 +1,6 @@
+cstrike15_src/
+GoldSrc-SDK/
+libraries/fmt/
+compile_commands.json
+.ccls-cache
+build
