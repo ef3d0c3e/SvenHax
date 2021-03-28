@@ -2,6 +2,8 @@
 #define SDK_CENGINEVGUI_HPP
 
 #include "../Util/Cenum.hpp"
+#include "IBaseInterface.hpp"
+typedef unsigned int VPANEL;
 
 MAKE_CENUM_Q(VGUIPANEL, int,
 	PANEL_ROOT, 0,
@@ -27,13 +29,11 @@ MAKE_CENUM_Q(VGuiPanel_t, int,
 	PANEL_STEAMOVERLAY, 9,
 );
 
-typedef unsigned int VPANEL;
-
-class CEngineVGui
+class CEngineVGui : public IBaseInterface
 {
 public:
-	virtual ~CEngineVGui() = 0;
-	virtual VPANEL GetPanel(VGuiPanel_t type) = 0;
+	virtual ~CEngineVGui(void) { }
+	virtual VPANEL GetPanel(VGUIPANEL type) = 0;
 	virtual bool SteamRefreshLogin(const char *password, bool isSecure) = 0;
 	virtual bool SteamProcessCall(bool *finished, struct TSteamProgress *progress, struct TSteamError *steamError) = 0;
 };

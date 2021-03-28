@@ -1,7 +1,7 @@
 #ifndef SDK_CGAMECONSOLE_HPP
 #define SDK_CGAMECONSOLE_HPP
 
-#include "IEngineVGui.hpp"
+#include "CEngineVGui.hpp" // VPANEL
 
 
 class CGameConsole : public IBaseInterface

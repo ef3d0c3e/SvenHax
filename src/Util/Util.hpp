@@ -7,6 +7,8 @@
 #include <elf.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
+#include <codecvt>
+#include <locale>
 #include <fmt/format.h>
 #include "Cenum.hpp"
 #include "Math.hpp"
@@ -101,11 +103,54 @@ template <class T>
 T GetSymbolAddress(const char* filename, const char* symbol)
 {
 	void* handle = dlopen(filename, RTLD_NOW | RTLD_LOCAL);
-	T result = reinterpret_cast<T>(dlsym(handle, symbol));
-	dlclose(handle);
+	if (handle == nullptr)
+		throw Exception("GetSymbolAddress() Failed to get handle of file '{}'", filename);
 
-	return result;
+	void* p = dlsym(handle, symbol);
+	dlclose(handle);
+	if (p == nullptr)
+		throw Exception("GetSymbolAddress() Failed to get symbol '{}' in file '{}'", symbol, filename);
+
+	return reinterpret_cast<T>(p);
 };
+
+// GNU chads have 4byte wchar_t
+template <typename T, typename U>
+std::basic_string<T> StringConvert(const std::basic_string<U>& s)
+{
+	if constexpr (std::is_same_v<T, U>)
+		return s;
+
+	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> conv;
+	if constexpr (std::is_same_v<T, wchar_t>)
+	{
+		if constexpr (std::is_same_v<U, char>)
+		{
+			try
+			{
+				return conv.from_bytes(s);
+			}
+			catch (std::range_error&)
+			{
+				throw Exception("StringConvert<{0}, {1}>() Failed, could not convert '{2}'", type_name<T>, type_name<U>, s);
+			}
+		}
+	}
+	else if constexpr (std::is_same_v<T, char>)
+	{
+		if constexpr (std::is_same_v<U, wchar_t>)
+		{
+			try
+			{
+				return conv.to_bytes(s);
+			}
+			catch (std::range_error&)
+			{
+				throw Exception("StringConvert<{0}, {1}>() Failed, could not convert '{2}'", type_name<T>, type_name<U>, s);
+			}
+		}
+	}
+}
 
 Elf64_Word GetProtectionFlags(std::uintptr_t address);
 

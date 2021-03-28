@@ -6,8 +6,10 @@
 namespace Hooks
 {
 	// Painting
-	void Paint(void* thisptr, PaintMode_t mode); // Draw with Surface
-	//void PaintImGui(); // Draw with ImGui.
+	//void Paint(void* thisptr, PaintMode_t mode); // Draw with Surface
+	void PaintImGui(); // Draw with ImGui.
+
+	//void IsKeyDown(void* thisptr, KeyCode code);
 }
 
 /*
@@ -17,21 +19,23 @@ namespace CreateMove
 	extern QAngle lastTickViewAngles;
 }
 
-namespace SetKeyCodeState
+*/
+namespace KeyCodeState
 {
 	extern bool shouldListen;
 	extern KeyCode* keyOutput;
 }
-*/
 
-namespace Paint
+namespace SDL2
 {
-    // updated in paint.
-    extern int engineWidth;
-    extern int engineHeight;
-    // updated in sdlhook (for stretched users, instead of stretching the whole imgui system, we can do it ourselves and leave the menu crisp)
-    extern int windowWidth;
-    extern int windowHeight;
+	extern int windowWidth;
+	extern int windowHeight;
+
+	void HookSwapWindow();
+	void UnhookWindow();
+
+	void HookPollEvent();
+	void UnhookPollEvent();
 }
 
 #endif // HOOKS_HOOKS_HPP

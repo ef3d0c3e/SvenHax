@@ -940,7 +940,6 @@ public:
 	Vector(Args... args)
 	{
 		static_assert(sizeof...(Args) == N);
-		static_assert(((std::is_same_v<T, Args>)&&...));
 
 		std::size_t i = 0;
 		((d[i++] = args), ...);

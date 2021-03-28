@@ -1,18 +1,55 @@
-#include "Hooks.hpp"
 #include "../Interface.hpp"
-#include <mutex>
+#include "../Util/Draw.hpp"
+#include "Hooks.hpp"
 
-int Paint::engineWidth;
-int Paint::engineHeight;
-int Paint::windowWidth;
-int Paint::windowHeight;
+#include <mutex>
 
 std::mutex drawMutex;
 
-typedef void (*PaintFn) (void*, PaintMode_t);
-void Hooks::Paint(void* thisptr, PaintMode_t mode)
+void Hooks::PaintImGui()
 {
-	//engineVGuiVMT->GetOriginalMethod<PaintFn>(10)(thisptr, mode);
+	std::unique_lock<std::mutex> lock(drawMutex);
 
-    surface->GetScreenSize(Paint::engineWidth, Paint::engineHeight);
+	// TODO: Surface drawing
+
+	int w, h;
+	surface->GetScreenSize(w, h);
+	float width = (float)w;
+	float height = (float)h;
+	float imWidth = SDL2::windowWidth;
+	float imHeight = SDL2::windowHeight;
+
+	for (const DrawRequest& value : Draw::drawRequests)
+	{
+		/* Convert in case there are stretched resolution users - DONT write to original struct! */
+		int x0 = (int)((value.x0 / width) * imWidth);
+		int y0 = (int)((value.y0 / height) * imHeight);
+		int x1 = (int)((value.x1 / width) * imWidth);
+		int y1 = (int)((value.y1 / height) * imHeight);
+
+		switch (value.type)
+		{
+			case DRAW_LINE:
+				Draw::ImLine(ImVec2(x0, y0), ImVec2(x1, y1), value.color);
+				break;
+			case DRAW_RECT:
+				Draw::ImRect(x0, y0, x1, y1, value.color);
+				break;
+			case DRAW_RECT_FILLED:
+				Draw::ImRectFilled(x0, y0, x1, y1, value.color);
+				break;
+			case DRAW_CIRCLE:
+				Draw::ImCircle(ImVec2(x0, y0), value.color, value.circleRadius, value.circleSegments, value.thickness);
+				break;
+			case DRAW_CIRCLE_FILLED:
+				Draw::ImCircleFilled(ImVec2(x0, y0), value.color, value.circleRadius, value.circleSegments);
+				break;
+			case DRAW_CIRCLE_3D:
+				Draw::ImCircle3D(value.pos, value.circleSegments, value.circleRadius, value.color);
+				break;
+			case DRAW_TEXT:
+				Draw::ImText(ImVec2(x0, y0), value.color, value.text, nullptr, 0.0f, nullptr, value.fontflags);
+				break;
+		}
+	}
 }

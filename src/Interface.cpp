@@ -62,12 +62,13 @@ void Interface::FindInterfaces()
 	surface         = get.template operator()<CSurface>               ("surface",        "hw.so",                      "VGUI_Surface");
 	engineVGui      = get.template operator()<CEngineVGui>            ("engineVGui",     "hw.so",                      "VEngineVGui");
 
-	clientDLL       = get.template operator()<CCLientDLL>             ("clientDLL",      "svencoop/cl_dlls/client.so",  "SCClientDLL");
+	clientDLL       = get.template operator()<CCLientDLL>             ("clientDLL",      "svencoop/cl_dlls/client.so", "SCClientDLL");
 
 	schemeManager   = get.template operator()<CSchemeManager>         ("schemeManager",  "vgui2.so",                   "VGUI_Scheme");
 	keyValues       = get.template operator()<CVGuiKeyValues>         ("keyValues",      "vgui2.so",                   "KeyValues");
 	panel           = get.template operator()<VPanelWrapper>          ("panel",          "vgui2.so",                   "VGUI_Panel");
 	vgui            = get.template operator()<CVGui>                  ("vgui",           "vgui2.so",                   "VGUI_ivgui");
+
 	input           = get.template operator()<CInputWin>              ("input",          "vgui2.so",                   "VGUI_Input");
 	csystem         = get.template operator()<CSystem>                ("csystem",        "vgui2.so",                   "VGUI_System");
 

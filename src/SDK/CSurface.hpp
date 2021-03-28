@@ -1,9 +1,10 @@
 #ifndef SKD_CSURFACE_HPP
 #define SKD_CSURFACE_HPP
 
+#include "VGuiVertex.hpp" // VGuiVertex
 #include "Color.hpp"
 #include "IAppSystem.hpp"
-#include "IEngineVGui.hpp"
+#include "CEngineVGui.hpp"
 
 
 class IImage;
@@ -16,6 +17,7 @@ class IHTMLChromeController;
 typedef unsigned long HCursor;
 typedef unsigned long HTexture;
 typedef unsigned long HFont;
+
 
 class CSurface : public IBaseInterface, public IAppSystem
 {
@@ -183,7 +185,7 @@ public:
 	virtual void SurfaceSetCursorPos(int x, int y) = 0;
 
  	// SRC only functions!!!
-	virtual void DrawTexturedPolygon(struct VGuiVertex *pVertices, int n) = 0;
+	virtual void DrawTexturedPolygon(VGuiVertex *pVertices, int n) = 0;
 	virtual int GetFontAscent(HFont font, wchar_t wch) = 0;
 
 	// web browser

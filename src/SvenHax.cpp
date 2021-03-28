@@ -27,7 +27,7 @@ VMT* engineVGuiVMT = nullptr;
 
 void MainThread()
 {
-	Message("Loaded");
+	Message("Loading...");
 	//TODO: wait till we can use ofstream...
 	{
 		std::unique_lock<std::mutex> lck(mtx);
@@ -55,6 +55,9 @@ void MainThread()
 		Interface::DumpInterfaces();
 		Interface::FindInterfaces();
 
+		SDL2::HookSwapWindow();
+		SDL2::HookPollEvent();
+		
 		console->DPrintf("SvenHax Successfully Loaded...\n");
 	}
 	catch (Exception& e)
@@ -79,6 +82,9 @@ void __attribute__((destructor)) Shutdown()
 {
 	mainThread->join();
 	VMT::ReleaseAllVMTs();
+
+	SDL2::UnhookWindow();
+	SDL2::UnhookPollEvent();
 
 	Message("Unloaded");
 }

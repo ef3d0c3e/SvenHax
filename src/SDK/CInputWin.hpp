@@ -63,7 +63,7 @@ public:
 	// inputs into vgui2 input handling
 	virtual bool InternalCursorMoved(int x,int y) = 0; //expects input in surface space
 	virtual bool InternalMousePressed(MouseCode code) = 0;
-	//virtual bool InternalMouseDoublePressed(MouseCode code) = 0;
+	virtual bool InternalMouseDoublePressed(MouseCode code) = 0;
 	virtual bool InternalMouseReleased(MouseCode code) = 0;
 	virtual bool InternalMouseWheeled(int delta) = 0;
 	virtual bool InternalKeyCodePressed(KeyCode code) = 0;
