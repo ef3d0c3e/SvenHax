@@ -1,6 +1,7 @@
 cstrike15_src/
 GoldSrc-SDK/
 halflife/
+MetaHookSv/
 libraries/fmt/
 compile_commands.json
 .ccls-cache

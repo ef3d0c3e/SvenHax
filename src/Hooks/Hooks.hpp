@@ -6,7 +6,6 @@
 namespace Hooks
 {
 	// Painting
-	//void Paint(void* thisptr, PaintMode_t mode); // Draw with Surface
 	void PaintImGui(); // Draw with ImGui.
 
 	//void IsKeyDown(void* thisptr, KeyCode code);
