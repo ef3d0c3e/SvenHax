@@ -33,8 +33,5 @@
 #include "InputEvent.hpp"
 #include "KeyCode.hpp"
 #include "LevelLoadingProgress.hpp"
-#include "QAngle.hpp"
-#include "Color.hpp"
-#include "Vector.hpp"
 
 #endif // SDK_HPP

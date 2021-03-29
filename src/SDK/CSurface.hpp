@@ -2,7 +2,7 @@
 #define SKD_CSURFACE_HPP
 
 #include "VGuiVertex.hpp" // VGuiVertex
-#include "Color.hpp"
+#include "../Engine/Primitives/Color.hpp"
 #include "IAppSystem.hpp"
 #include "CEngineVGui.hpp"
 

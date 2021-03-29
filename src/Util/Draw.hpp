@@ -3,6 +3,8 @@
 
 #include "../ImGUI/imgui.h"
 #include "../SDK/SDK.hpp"
+#include "../Engine/Primitives/Vector.hpp"
+#include "../Engine/Primitives/Color.hpp"
 #include "Cenum.hpp"
 #include <deque>
 
@@ -55,27 +57,27 @@ namespace Draw
 extern std::deque<DrawRequest> drawRequests;
 
 // Surface
-void Circle(Vec2D position, int segments, float radius, Color color);
+void Circle(Vec2 position, int segments, float radius, Color color);
 void OutlinedCircle(int x0, int y0, int segments, int radius, Color col);
-void FilledCircle(Vec2D position, int segments, float radius, Color color);
+void FilledCircle(Vec2 position, int segments, float radius, Color color);
 void Circle3D(const Vec& position, int segments, float radius, Color color);
 void FilledRectangle(int x0, int y0, int x1, int y1, Color col);
-void FilledRectangle(Vec2D start_pos, Vec2D end_pos, Color col);
+void FilledRectangle(Vec2 start_pos, Vec2 end_pos, Color col);
 void Rectangle(int x0, int y0, int x1, int y1, Color col);
-void Rectangle(Vec2D start_pos, Vec2D end_pos, Color col);
+void Rectangle(Vec2 start_pos, Vec2 end_pos, Color col);
 void Line(int x0, int y0, int x1, int y1, Color col);
-void Line(Vec2D start_pos, Vec2D end_pos, Color col);
+void Line(Vec2 start_pos, Vec2 end_pos, Color col);
 void PolyLine(int* px, int* py, int num_points, Color col);
 void PolyLine(VGuiVertex* vertice, int num_points, Color col);
 void TexturedPolygon(int n, VGuiVertex* vertice, Color col);
 void TextW(int x, int y, const wchar_t* text, HFont font, Color col);
-void TextW(Vec2D pos, const wchar_t* text, HFont font, Color col);
+void TextW(Vec2 pos, const wchar_t* text, HFont font, Color col);
 void Text(int x, int y, const char* text, HFont font, Color col);
-void Text(Vec2D pos, const char* text, HFont font, Color col);
+void Text(Vec2 pos, const char* text, HFont font, Color col);
 void GetTextWSize(const wchar_t* text, HFont font, int& wide, int& tall);
-Vec2D GetTextWSize(const wchar_t* text, HFont font);
+Vec2 GetTextWSize(const wchar_t* text, HFont font);
 void GetTextSize(const char* text, HFont font, int& wide, int& tall);
-Vec2D GetTextSize(const char* text, HFont font);
+Vec2 GetTextSize(const char* text, HFont font);
 
 // ImGui
 void ImCircle(ImVec2 point, ImColor color, float radius, int num_segments = 12, float thickness = 1.0f);

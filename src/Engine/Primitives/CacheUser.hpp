@@ -1,0 +1,9 @@
+#ifndef ENGINE_PRIMITIVES_CACHEUSER_HPP
+#define ENGINE_PRIMITIVES_CACHEUSER_HPP
+
+struct CacheUser
+{
+	void* data;
+};
+
+#endif // ENGINE_PRIMITIVES_CACHEUSER_HPP
