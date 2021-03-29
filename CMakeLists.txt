@@ -2,7 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT("SvenHax")
 
 SET(CMAKE_CXX_FLAGS "-std=c++2a -m32 -ldl -lpthread -march=native -mtune=native -ftree-vectorize -Wall -fno-gnu-unique -fopenmp -fpic -O3")
-SET(CMAKE_C_FLAGS "-m32 -fpic -O3")
+SET(CMAKE_C_FLAGS "-m32 -march=native -mtune=native -Wall -fno-gnu-unique -fpic -O3")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -s -fvisibility=hidden -fvisibility-inlines-hidden")
+SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -s -fvisibility=hidden -fvisibility-inlines-hidden")
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 FILE(GLOB SOURCES

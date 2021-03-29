@@ -111,4 +111,6 @@ public:
 	}
 };
 
+typedef Vector<u8, 3> Color24;
+
 #endif // SDK_COLOR_HPP
