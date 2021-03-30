@@ -132,7 +132,7 @@ std::basic_string<T> StringConvert(const std::basic_string<U>& s)
 			}
 			catch (std::range_error&)
 			{
-				throw Exception("StringConvert<{0}, {1}>() Failed, could not convert '{2}'", type_name<T>, type_name<U>, s);
+				throw Exception("StringConvert<{0}, {1}>() Failed, could not convert '{2}'", type_name<T>(), type_name<U>(), s);
 			}
 		}
 	}

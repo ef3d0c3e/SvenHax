@@ -4,72 +4,72 @@
 
 std::deque<DrawRequest> Draw::drawRequests = {};
 
-void Draw::Circle(Vec2D position, int segments, float radius, Color color)
+void Draw::Circle(Vec2 position, int segments, float radius, Color32 color)
 {
 	float step = (float)M_PI * 2.0f / (float)segments;
 
 	for (float a = 0; a < (M_PI * 2.0f); a += step)
 	{
-		Vec2D start(radius * cosf(a) + position[0], radius * sinf(a) + position[1]);
-		Vec2D end(radius * cosf(a + step) + position[0], radius * sinf(a + step) + position[1]);
+		Vec2 start(radius * cosf(a) + position[0], radius * sinf(a) + position[1]);
+		Vec2 end(radius * cosf(a + step) + position[0], radius * sinf(a + step) + position[1]);
 		Line(start, end, color);
 	}
 }
 
-void Draw::OutlinedCircle(int x0, int y0, int segments, int radius, Color col)
+void Draw::OutlinedCircle(int x0, int y0, int segments, int radius, Color32 col)
 {
 	//TODO...
 }
 
-void Draw::FilledCircle(Vec2D position, int segments, float radius, Color color)
+void Draw::FilledCircle(Vec2 position, int segments, float radius, Color32 color)
 {
 	//TODO...
 }
 
-void Draw::Circle3D(const Vec& position, int segments, float radius, Color color)
+void Draw::Circle3D(const Vec3& position, int segments, float radius, Color32 color)
 {
 	//TODO...
 }
 
-void Draw::FilledRectangle(int x0, int y0, int x1, int y1, Color col)
+void Draw::FilledRectangle(int x0, int y0, int x1, int y1, Color32 col)
 {
 	surface->DrawSetColor(col);
 	surface->DrawFilledRect(x0, y0, x1, y1);
 }
-void Draw::FilledRectangle(Vec2D start_pos, Vec2D end_pos, Color col)
+void Draw::FilledRectangle(Vec2 start_pos, Vec2 end_pos, Color32 col)
 {
 	FilledRectangle(start_pos[0], start_pos[1], end_pos[0], end_pos[1], col);
 }
 
-void Draw::Rectangle(int x0, int y0, int x1, int y1, Color col)
+void Draw::Rectangle(int x0, int y0, int x1, int y1, Color32 col)
 {
 	surface->DrawSetColor(col);
 	surface->DrawOutlinedRect(x0, y0, x1, y1);
 }
 
-void Draw::Rectangle(Vec2D start_pos, Vec2D end_pos, Color col)
+void Draw::Rectangle(Vec2 start_pos, Vec2 end_pos, Color32 col)
 {
 	Rectangle(start_pos[0], start_pos[1], end_pos[0], end_pos[1], col);
 }
 
-void Draw::Line(int x0, int y0, int x1, int y1, Color col)
+void Draw::Line(int x0, int y0, int x1, int y1, Color32 col)
 {
 	surface->DrawSetColor(col);
 	surface->DrawLine(x0, y0, x1, y1);
 }
 
-void Draw::Line(Vec2D start_pos, Vec2D end_pos, Color col)
+void Draw::Line(Vec2 start_pos, Vec2 end_pos, Color32 col)
 {
 	Line(start_pos[0], start_pos[1], end_pos[0], end_pos[1], col);
 }
 
-void Draw::PolyLine(int* px, int* py, int num_points, Color col)
+void Draw::PolyLine(int* px, int* py, int num_points, Color32 col)
 {
 	surface->DrawSetColor(col);
 	surface->DrawPolyLine(px, py, num_points);
 }
 
-void Draw::PolyLine(VGuiVertex* vertice, int num_points, Color col)
+void Draw::PolyLine(VGuiVertex* vertice, int num_points, Color32 col)
 {
 	static int* points_x = new int[num_points];
 	static int* points_y = new int[num_points];
@@ -81,7 +81,7 @@ void Draw::PolyLine(VGuiVertex* vertice, int num_points, Color col)
 	PolyLine(points_x, points_y, num_points, col);
 }
 
-void Draw::TexturedPolygon(int n, VGuiVertex* vertice, Color col)
+void Draw::TexturedPolygon(int n, VGuiVertex* vertice, Color32 col)
 {
 	static unsigned char buf[4] = { 255, 255, 255, 255 };
 	static int texture_id;
@@ -93,7 +93,7 @@ void Draw::TexturedPolygon(int n, VGuiVertex* vertice, Color col)
 	surface->DrawTexturedPolygon(vertice, n);
 }
 
-void Draw::TextW(int x, int y, const wchar_t* text, HFont font, Color col)
+void Draw::TextW(int x, int y, const wchar_t* text, HFont font, Color32 col)
 {
 	surface->DrawSetTextPos(x, y);
 	surface->DrawSetTextFont(font);
@@ -101,12 +101,12 @@ void Draw::TextW(int x, int y, const wchar_t* text, HFont font, Color col)
 	surface->DrawPrintText(text, wcslen(text));
 }
 
-void Draw::TextW(Vec2D pos, const wchar_t* text, HFont font, Color col)
+void Draw::TextW(Vec2 pos, const wchar_t* text, HFont font, Color32 col)
 {
 	TextW(pos[0], pos[1], text, font, col);
 }
 
-void Draw::Text(int x, int y, const char* text, HFont font, Color col)
+void Draw::Text(int x, int y, const char* text, HFont font, Color32 col)
 {
 	std::wstring wc = StringConvert<wchar_t>(std::string(text));
 
@@ -116,7 +116,7 @@ void Draw::Text(int x, int y, const char* text, HFont font, Color col)
 	surface->DrawPrintText(wc.c_str(), wcslen(wc.c_str()));
 }
 
-void Draw::Text(Vec2D pos, const char* text, HFont font, Color col)
+void Draw::Text(Vec2 pos, const char* text, HFont font, Color32 col)
 {
 	Text(pos[0], pos[1], text, font, col);
 }
@@ -133,20 +133,20 @@ void Draw::GetTextSize(const char* text, HFont font, int& wide, int& tall)
 	surface->GetTextSize(font, wc.c_str(), wide, tall);
 }
 
-Vec2D Draw::GetTextWSize(const wchar_t* text, HFont font)
+Vec2 Draw::GetTextWSize(const wchar_t* text, HFont font)
 {
 	int x_res, y_res;
 	surface->GetTextSize(font, text, x_res, y_res);
-	return Vec2D(x_res, y_res);
+	return Vec2(x_res, y_res);
 }
 
-Vec2D Draw::GetTextSize(const char* text, HFont font)
+Vec2 Draw::GetTextSize(const char* text, HFont font)
 {
 	std::wstring wc = StringConvert<wchar_t>(std::string(text));
 
 	int x_res, y_res;
 	surface->GetTextSize(font, wc.c_str(), x_res, y_res);
-	return Vec2D(x_res, y_res);
+	return Vec2(x_res, y_res);
 }
 
 void Draw::ImText(ImVec2 pos, ImColor color, const char* text_begin, const char* text_end, float wrap_width, const ImVec4* cpu_fine_clip_rect, ImFontFlags flags)
@@ -212,17 +212,17 @@ void Draw::ImLine(ImVec2 a, ImVec2 b, ImColor color, float thickness)
 	ImGui::GetWindowDrawList()->AddLine(a, b, color, thickness);
 }
 
-void Draw::ImCircle3D(Vec position, int segments, float radius, ImColor color)
+void Draw::ImCircle3D(Vec3 position, int segments, float radius, ImColor color)
 {
 	float step = (float)M_PI * 2.0f / (float)segments;
 
 	for (float a = 0; a < (M_PI * 2.0f); a += step)
 	{
 
-		Vec start(radius * cosf(a) + position[0],
+		Vec3 start(radius * cosf(a) + position[0],
 				  radius * sinf(a) + position[1],
 				  position[2]);
-		Vec end(radius * cosf(a + step) + position[0],
+		Vec3 end(radius * cosf(a + step) + position[0],
 				radius * sinf(a + step) + position[1],
 				position[2]);
 
@@ -301,7 +301,7 @@ void Draw::AddCircleFilled(int x0, int y0, float radius, ImColor color, int segm
 	drawRequests.push_back(req);
 }
 
-void Draw::AddCircle3D(const Vec& pos3D, float radius, ImColor color, int segments)
+void Draw::AddCircle3D(const Vec3& pos3D, float radius, ImColor color, int segments)
 {
 	DrawRequest req = {};
 	req.type = DRAW_CIRCLE_3D;
