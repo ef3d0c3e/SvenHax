@@ -34,8 +34,8 @@ struct PhysEnt
 
 	// For mods
 	Vector<i32, 4> iuser;
-	Vector<float, 4> fuser;
-	Vector<Vec, 4> vuser;
+	Vector<f32, 4> fuser;
+	Vector<Vec3, 4> vuser;
 }
 
 #endif // ENGINE_PHYSENT_HPP

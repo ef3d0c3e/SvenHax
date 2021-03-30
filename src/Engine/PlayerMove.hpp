@@ -64,9 +64,9 @@ struct PlayerMove
 	f32 clientMaxSpeed; // Player specific maxspeed
 
 	// For mods
-	Vector<int, 4> iuser;
-	Vector<float, 4> fuser;
-	Vector<Vec, 4> vuser;
+	Vector<i32, 4> iuser;
+	Vector<f32, 4> fuser;
+	Vector<Vec3, 4> vuser;
 
 	// world state
 	// Number of entities to clip against.
@@ -98,39 +98,39 @@ struct PlayerMove
 	/* TODO: Do something about these
 	// Common functions
 	const char* (*PM_Info_ValueForKey)(const char* s, const char* key);
-	void (*PM_Particle)(float* origin, int color, float life, int zpos, int zvel);
-	i32 (*PM_TestPlayerPosition)(float* pos, PMTrace* ptrace);
+	void (*PM_Particle)(f32* origin, i32 color, f32 life, i32 zpos, i32 zvel);
+	i32 (*PM_TestPlayerPosition)(f32* pos, PMTrace* ptrace);
 	void (*Con_NPrintf)(int idx, char* fmt, ...);
 	void (*Con_DPrintf)(char* fmt, ...);
 	void (*Con_Printf)(char* fmt, ...);
 	double (*Sys_FloatTime)(void);
 	void (*PM_StuckTouch)(int hitent, PMTrace* ptraceresult);
-	i32 (*PM_PointContents)(float* p, int* truecontents); //filled in if this is non-null
-	i32 (*PM_TruePointContents)(float* p);
-	i32 (*PM_HullPointContents)(struct hull_s* hull, int num, float* p);
-	PMTrace (*PM_PlayerTrace)(float* start, float* end, int traceFlags, int ignore_pe);
-	struct PMTrace* (*PM_TraceLine)(float* start, float* end, int flags, int usehulll, int ignore_pe);
+	i32 (*PM_PointContents)(f32* p, int* truecontents); //filled in if this is non-null
+	i32 (*PM_TruePointContents)(f32* p);
+	i32 (*PM_HullPointContents)(struct hull_s* hull, i32 num, f32* p);
+	PMTrace (*PM_PlayerTrace)(f32* start, f32* end, i32 traceFlags, i32 ignore_pe);
+	struct PMTrace* (*PM_TraceLine)(f32* start, f32* end, i32 flags, i32 usehulll, i32 ignore_pe);
 	long (*RandomLong)(long lLow, long lHigh);
-	f32 (*RandomFloat)(float flLow, float flHigh);
+	f32 (*RandomFloat)(f32 flLow, f32 flHigh);
 	i32 (*PM_GetModelType)(struct model_s* mod);
-	void (*PM_GetModelBounds)(struct model_s* mod, float* mins, float* maxs);
-	void* (*PM_HullForBsp)(PhysEnt* pe, float* offset);
-	f32 (*PM_TraceModel)(PhysEnt* pEnt, float* start, float* end, trace_t* trace);
+	void (*PM_GetModelBounds)(struct model_s* mod, f32* mins, f32* maxs);
+	void* (*PM_HullForBsp)(PhysEnt* pe, f32* offset);
+	f32 (*PM_TraceModel)(PhysEnt* pEnt, f32* start, f32* end, trace_t* trace);
 	i32 (*COM_FileSize)(char* filename);
-	u8* (*COM_LoadFile)(char* path, int usehunk, int* pLength);
+	u8* (*COM_LoadFile)(char* path, i32 usehunk, int* pLength);
 	void (*COM_FreeFile)(void* buffer);
-	char* (*memfgets)(u8* pMemFile, int fileSize, int* pFilePos, char* pBuffer, int bufferSize);
+	char* (*memfgets)(u8* pMemFile, i32 fileSize, int* pFilePos, char* pBuffer, i32 bufferSize);
 
 	// Functions
 	// Run functions for this frame?
 	QBool runFuncs;
-	void (*PM_PlaySound)(int channel, const char* sample, float volume, float attenuation, int fFlags, int pitch);
-	const char* (*PM_TraceTexture)(int ground, float* vstart, float* vend);
-	void (*PM_PlaybackEventFull)(int flags, int clientindex, unsigned short eventindex, float delay, float* origin, float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2);
+	void (*PM_PlaySound)(int channel, const char* sample, f32 volume, f32 attenuation, i32 fFlags, i32 pitch);
+	const char* (*PM_TraceTexture)(int ground, f32* vstart, f32* vend);
+	void (*PM_PlaybackEventFull)(int flags, i32 clientindex, unsigned short eventindex, f32 delay, f32* origin, f32* angles, f32 fparam1, f32 fparam2, i32 iparam1, i32 iparam2, i32 bparam1, i32 bparam2);
 
-	PMTrace (*PM_PlayerTraceEx)(float* start, float* end, int traceFlags, int (*pfnIgnore)(PhysEnt* pe));
-	i32 (*PM_TestPlayerPositionEx)(float* pos, PMTrace* ptrace, int (*pfnIgnore)(PhysEnt* pe));
-	PMTrace* (*PM_TraceLineEx)(float* start, float* end, int flags, int usehulll, int (*pfnIgnore)(PhysEnt* pe));
+	PMTrace (*PM_PlayerTraceEx)(f32* start, f32* end, i32 traceFlags, i32 (*pfnIgnore)(PhysEnt* pe));
+	i32 (*PM_TestPlayerPositionEx)(f32* pos, PMTrace* ptrace, i32 (*pfnIgnore)(PhysEnt* pe));
+	PMTrace* (*PM_TraceLineEx)(f32* start, f32* end, i32 flags, i32 usehulll, i32 (*pfnIgnore)(PhysEnt* pe));
 	*/
 }
 
