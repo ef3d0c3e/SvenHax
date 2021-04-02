@@ -2,6 +2,7 @@
 #define ENGINE_PRIMITIVES_CLIENTDATA_HPP
 
 #include "Vector.hpp"
+#include "QAngle.hpp"
 
 struct ClientData
 {

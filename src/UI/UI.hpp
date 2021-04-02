@@ -7,6 +7,8 @@ namespace UI
 	extern bool isVisible;
 
 	void SetVisible(bool visible);
+	
+	void Draw();
 }
 
 #endif // UI_UI_HPP

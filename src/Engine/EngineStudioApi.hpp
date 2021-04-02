@@ -2,7 +2,7 @@
 #define ENGINE_ENGINESTUDIOAPI_HPP
 
 #include "Entity.hpp"
-#include "Models.hpp"
+#include "Model.hpp"
 #include "Primitives/CVar.hpp"
 #include "Primitives/CacheUser.hpp"
 #include "Primitives/EntityState.hpp"
@@ -10,6 +10,7 @@
 
 struct EngineStudioApi
 {
+	/*
 	// Allocate number*size bytes and zero it
 	void* (*Mem_Calloc)(i32 number, size_t size);
 	// Check to see if pointer is in the cache
@@ -100,6 +101,7 @@ struct EngineStudioApi
 	void (*StudioSetRenderamt)(i32 iRenderamt); //!!!CZERO added for rendering glass on viewmodels
 	void (*StudioSetCullState)(i32 iCull);
 	void (*StudioRenderShadow)(i32 iSprite, f32* p1, f32* p2, f32* p3, f32* p4);
+	*/
 };
 
 #endif // ENGINE_ENGINESTUDIOAPI_HPP

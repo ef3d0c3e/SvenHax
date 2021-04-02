@@ -13,7 +13,6 @@
 #include "../Util/Util.hpp"
 #include "Hooks.hpp"
 #include <SDL2/SDL.h>
-#include <sys/mman.h>
 
 int SDL2::windowWidth = 0;
 int SDL2::windowHeight = 0;
@@ -148,7 +147,7 @@ static void SwapWindow(SDL_Window* window)
 		}
 	}*/
 
-	if (io.WantCaptureMouse)
+	if (true || io.WantCaptureMouse)
 	{
 		int mx, my;
 		SDL_GetMouseState(&mx, &my);
@@ -163,15 +162,8 @@ static void SwapWindow(SDL_Window* window)
 	ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
 	ImGui::SetNextWindowBgAlpha(0.0f);
 	ImGui::Begin("", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
-	/*
-	UI::SetupColors();
-	UI::SetupWindows();
-	UI::DrawImWatermark();
-	 * TODO...
-	*/
 
-	if (UI::isVisible)
-	ImGui::ShowDemoWindow();
+	UI::Draw();
 
 	Hooks::PaintImGui(); // Process ImGui Draw Commands
 
@@ -195,7 +187,7 @@ void SDL2::HookSwapWindow()
 	// 83 EC 18              - sub esp,18
 	// E8 F28FF7FF           - call libSDL2-2.0.so.0+A6F6 <- moves the address of the next instruction into rbx
 	// 81 C3 A4380400        - add ebx,000438A4
-	// 8B 44 24 20           - mov eax,[rsp+20] 
+	// 8B 44 24 20           - mov eax,[rsp+20]
 	// 8B 93 24860000        - mov edx,[rbx+00008624]
 	// 85 D2                 - test edx,edx
 	swapWindowHook = new Tramp(GetSymbolAddress<std::uintptr_t>("libSDL2-2.0.so.0", "SDL_GL_SwapWindow"), reinterpret_cast<std::uintptr_t>(&SwapWindow), 9,

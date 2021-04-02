@@ -2,6 +2,8 @@
 #define ENGINE_PRIMITIVES_MLEAF_HPP
 
 #include "EFrag.hpp"
+#include "MNode.hpp"
+#include "MSurface.hpp"
 
 struct MLeaf
 {
@@ -17,11 +19,11 @@ struct MLeaf
 	u8* compressedVis;
 	EFrag* efrags;
 
-	msurface_t** firstMarkSurface;
+	MSurface** firstMarkSurface;
 	i32 numMarkSurfaces;
 	i32 key; // BSP sequence number for leaf's contents
-	static constexpr inline NumAmbients = 4;
+	static constexpr inline std::size_t NumAmbients = 4;
 	u8 ambientSoundLevel[NumAmbients];
-}
+};
 
 #endif // ENGINE_PRIMITIVES_MLEAF_HPP

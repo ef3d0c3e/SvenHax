@@ -3,7 +3,7 @@
 
 #include "Model.hpp"
 #include "Primitives/EntityState.hpp"
-#include "Primitives/Positionhistory.hpp"
+#include "Primitives/PositionHistory.hpp"
 #include "Primitives/Mouth.hpp"
 #include "Primitives/LatchedVars.hpp"
 
@@ -47,6 +47,6 @@ struct Entity
 	i32 visframe; // last frame this entity was found in an active leaf
 	//colorVec cvFloorColor;
 	Vector<i32, 4> cvFloorColor; // ??
-}
+};
 
 #endif // ENGINE_ENTITY_HPP

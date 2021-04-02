@@ -32,8 +32,6 @@ extern CVGuiSystemModuleLoader* moduleLoader;
 extern CServerBrowser* serverBrowser;
 extern CDefaultCvar* cvar;
 
-extern VMT* engineVGuiVMT;
-
 namespace Interface
 {
 	void FindInterfaces();
@@ -41,6 +39,8 @@ namespace Interface
 
 	extern std::uintptr_t BaseAddr;
 	std::uintptr_t GetBaseAddress();
+
+	void FindClientDLLFuncs();
 }
 
 #endif // INTERFACE_HPP

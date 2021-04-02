@@ -9,7 +9,7 @@ struct DModel
 	Vec3 origin;
 	i32 headNode[Hull::MaxMapHulls];
 	i32 visLeafs; // not including the solid leaf 0
-	i32 firstFace
+	i32 firstFace;
 	i32 numFaces;
 };
 

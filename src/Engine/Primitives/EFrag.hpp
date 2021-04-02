@@ -3,6 +3,7 @@
 
 #include "Vector.hpp"
 struct MLeaf;
+struct Entity;
 
 struct EFrag
 {

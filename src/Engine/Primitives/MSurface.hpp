@@ -1,9 +1,11 @@
 #ifndef ENGINE_PRIMITIVES_MSURFACE_HPP
 #define ENGINE_PRIMITIVES_MSURFACE_HPP
 
+#include "Color.hpp"
 #include "Decal.hpp"
 #include "MTexInfo.hpp"
-#include "SurfCache"
+#include "SurfCache.hpp"
+#include "MPlane.hpp"
 
 struct MSurface
 {
@@ -35,6 +37,6 @@ struct MSurface
 	Color24* samples;
 
 	Decal* pdecals;
-}
+};
 
 #endif // ENGINE_PRIMITIVES_MSURFACE_HPP

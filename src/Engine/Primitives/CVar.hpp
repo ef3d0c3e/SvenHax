@@ -10,6 +10,6 @@ struct CVar
 	i32 flags;
 	f32 value;
 	CVar* next;
-}
+};
 
 #endif // ENGINE_PRIMITIVES_CVAR_HPP

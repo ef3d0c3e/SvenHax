@@ -13,14 +13,14 @@
 #include "Primitives/Texture.hpp"
 #include "Primitives/CacheUser.hpp"
 
-MAKE_CENUM_Q(ModelType i32,
+MAKE_CENUM_Q(ModelType, i32,
 	BRUSH, 0,
 	SPRITE, 1,
 	ALIAS, 2,
-	STUDIO 3,
+	STUDIO, 3,
 );
 
-MAKE_CENUM_Q(SyncType i32,
+MAKE_CENUM_Q(SyncType, i32,
 	SYNC, 0,
 	RAND, 1,
 );
@@ -96,6 +96,6 @@ struct Model
 	// additional model data
 	//
 	CacheUser cache; // only access through Mod_Extradata
-}
+};
 
 #endif // ENNGINE_MODEL_HPP

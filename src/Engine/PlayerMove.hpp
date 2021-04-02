@@ -3,6 +3,8 @@
 
 #include "PhysEnt.hpp"
 #include "Primitives/MoveVars.hpp"
+#include "Primitives/UserCmd.hpp"
+#include "Primitives/PMTrace.hpp"
 
 struct PlayerMove
 {
@@ -75,7 +77,8 @@ struct PlayerMove
 	// Number of momvement entities (ladders)
 	i32 numMoveent;
 	// just a list of ladders
-	PhysEnt moveEnts[MAX_MOVEENTS];
+	static constexpr inline std::size_t MaxMoveEnts = 64;
+	PhysEnt moveEnts[MaxMoveEnts];
 
 	// All things being rendered, for tracing against things you don't actually collide with
 	i32 numBisEnt;
@@ -132,6 +135,6 @@ struct PlayerMove
 	i32 (*PM_TestPlayerPositionEx)(f32* pos, PMTrace* ptrace, i32 (*pfnIgnore)(PhysEnt* pe));
 	PMTrace* (*PM_TraceLineEx)(f32* start, f32* end, i32 flags, i32 usehulll, i32 (*pfnIgnore)(PhysEnt* pe));
 	*/
-}
+};
 
 #endif // ENGINE_PLAYERMOVE_HPP

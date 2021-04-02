@@ -23,6 +23,8 @@ std::string type_name()
 	return own != nullptr ? own.get() : typeid(TR).name();
 }
 
+std::string Demangle(const char* name);
+
 class Exception
 {
 	std::string m_msg;

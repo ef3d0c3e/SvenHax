@@ -29,6 +29,6 @@ struct MoveVars
 	f32 rollSpeed;
 	Color3f skyColor; // rgb
 	Vec3 skyVec;
-}
+};
 
 #endif // ENGINE_PRIMITIVES_MOVEVARS_HPP

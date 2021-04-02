@@ -17,6 +17,6 @@ struct PMTrace
 	Vec3 deltavelocity; // Change in player's velocity caused by impact.
 	// Only run on server.
 	i32 hitgroup;
-}
+};
 
 #endif // ENGINE_PRIMITIVES_PMTRACE_HPP

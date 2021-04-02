@@ -1,7 +1,7 @@
 #ifndef ENGINE_PRIMITIVES_ENTITYSTATE_HPP
 #define ENGINE_PRIMITIVES_ENTITYSTATE_HPP
 
-#include "Vector.hpp";
+#include "Vector.hpp"
 
 MAKE_CENUM_Q(EntityType, i32,
 	NORMAL, 1 << 0,

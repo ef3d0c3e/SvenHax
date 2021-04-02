@@ -10,6 +10,6 @@ struct MStudioEvent
 	i32 type;
 	static constexpr inline std::size_t OptionsLen = 64;
 	char options[OptionsLen];
-}
+};
 
 #endif // ENGINE_PRIMITIVES_MSTUDIOEVENT_HPP

@@ -2,6 +2,7 @@
 #define HOOKS_HOOKS_HPP
 
 #include "../SDK/SDK.hpp"
+#include "../Engine/ClientDLL.hpp"
 
 namespace Hooks
 {
@@ -9,16 +10,16 @@ namespace Hooks
 	void PaintImGui(); // Draw with ImGui.
 
 	//void IsKeyDown(void* thisptr, KeyCode code);
+	
+	void CreateMove(f32 frameTime, UserCmd* cmd, i32 active);
 }
 
-/*
 namespace CreateMove
 {
-	extern bool sendPacket;
-	extern QAngle lastTickViewAngles;
+	void HookCreateMove();
+	void UnhookCreateMove();
 }
 
-*/
 namespace KeyCodeState
 {
 	extern bool shouldListen;

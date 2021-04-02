@@ -2,6 +2,7 @@
 #define ENGINE_PRIMITIVES_MNODE_HPP
 
 #include "Vector.hpp"
+#include "MPlane.hpp"
 
 struct MNode
 {
@@ -19,6 +20,6 @@ struct MNode
 
 	u16 firstSurface;
 	u16 numSurfaces;
-}
+};
 
 #endif // ENGINE_PRIMITIVES_MNODE_HPP

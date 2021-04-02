@@ -2,6 +2,8 @@
 #define ENGINE_PHYSENT_HPP
 
 #include "Model.hpp"
+#include "Primitives/Vector.hpp"
+#include "Primitives/QAngle.hpp"
 
 struct PhysEnt
 {
@@ -36,6 +38,6 @@ struct PhysEnt
 	Vector<i32, 4> iuser;
 	Vector<f32, 4> fuser;
 	Vector<Vec3, 4> vuser;
-}
+};
 
 #endif // ENGINE_PHYSENT_HPP

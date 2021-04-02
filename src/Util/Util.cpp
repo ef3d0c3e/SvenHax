@@ -3,6 +3,13 @@
 #include <unistd.h>
 #include "VMT.hpp"
 
+std::string Demangle(const char* name)
+{
+	std::unique_ptr<char, void (*)(void*)> own // Get readable type name
+		(abi::__cxa_demangle(name, nullptr, nullptr, nullptr), std::free);
+	return own != nullptr ? own.get() : name;
+}
+
 Elf64_Word GetProtectionFlags(uintptr_t address)
 {
 	static Elf64_Word flags = 0;

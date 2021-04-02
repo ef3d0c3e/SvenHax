@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <fmt/format.h>
 
+#include "Engine/ClientDLL.hpp"
+
 #include "Util/Maps.hpp"
 #include "Util/VMT.hpp"
 #include "Interface.hpp"
@@ -22,8 +24,6 @@ inline void Message(const String& format, const auto&... args)
 	fmt::print(format, args...);
 	std::cout << "\033[0m\n";
 }
-
-VMT* engineVGuiVMT = nullptr;
 
 void MainThread()
 {
@@ -55,8 +55,11 @@ void MainThread()
 		Interface::DumpInterfaces();
 		Interface::FindInterfaces();
 
+		Interface::FindClientDLLFuncs();
+
 		SDL2::HookSwapWindow();
 		SDL2::HookPollEvent();
+		CreateMove::HookCreateMove();
 		
 		console->DPrintf("SvenHax Successfully Loaded...\n");
 	}
@@ -85,6 +88,7 @@ void __attribute__((destructor)) Shutdown()
 
 	SDL2::UnhookWindow();
 	SDL2::UnhookPollEvent();
+	CreateMove::UnhookCreateMove();
 
 	Message("Unloaded");
 }

@@ -6,7 +6,7 @@
 struct MVertex
 {
 	Vec3 pos;
-}
+};
 
 
 #endif // ENGINE_PRIMITIVES_MVERTEX_HPP

@@ -12,6 +12,10 @@
 #include <fstream>
 #include <fmt/format.h>
 
+#include "Engine/ClientDLL.hpp"
+
+using namespace std::literals;
+
 CBaseFileSystem* fileSystem = nullptr;
 CDedicatedServerAPI* dedicatedServer = nullptr;
 CEngineAPI* engineAPI = nullptr;
@@ -37,6 +41,8 @@ CRunGameEngine* gameEngine = nullptr;
 CVGuiSystemModuleLoader* moduleLoader = nullptr;
 CServerBrowser* serverBrowser = nullptr;
 CDefaultCvar* cvar = nullptr;
+
+ClientDLLFuncs* gClientDllFuncs = nullptr;
 
 void Interface::FindInterfaces()
 {
@@ -209,4 +215,63 @@ std::uintptr_t Interface::GetBaseAddress()
 	delete[] memoryAddressBuffer;
 
 	return baseAddress;
+}
+
+template <class T>
+static T GetSymbol(std::string filename, std::string symbol)
+{
+	T addr = GetSymbolAddress<T>(filename.c_str(), symbol.c_str());
+	if (addr == nullptr)
+		throw Exception("GetSymbol() Could not get symbol address for '{0}' in '{1}'", Demangle(symbol.c_str()), filename);
+
+	fmt::print("({1}) found '{0}'\n", Demangle(symbol.c_str()), filename);
+	
+	return addr;
+}
+
+void Interface::FindClientDLLFuncs()
+{
+	gClientDllFuncs = new ClientDLLFuncs{
+	.Init =                     GetSymbol<ClientDLLFuncs::InitFn>("hw.so"s, "_Z14ClientDLL_Initv"s),
+	.GetUserEntity =            GetSymbol<ClientDLLFuncs::GetUserEntityFn>("hw.so"s, "_Z23ClientDLL_GetUserEntityi"s),
+	.VoiceStatus =              GetSymbol<ClientDLLFuncs::VoiceStatusFn>("hw.so"s, "_Z21ClientDLL_VoiceStatusii"s),
+	.ChatInputPosition =        GetSymbol<ClientDLLFuncs::ChatInputPositionFn>("hw.so"s, "_Z27ClientDLL_ChatInputPositionPiS_"s),
+	.TempEntUpdate =            GetSymbol<ClientDLLFuncs::TempEntUpdateFn>("hw.so"s, "_Z23ClientDLL_TempEntUpdatedddPP9tempent_sS1_PFiP11cl_entity_sEPFvS0_fE"s),
+	.DirectorMessage =          GetSymbol<ClientDLLFuncs::DirectorMessageFn>("hw.so"s, "_Z25ClientDLL_DirectorMessageiPv"s),
+	.KeyEvent =                 GetSymbol<ClientDLLFuncs::KeyEventFn>("hw.so"s, "_Z19ClientDLL_Key_EventiiPKc"s),
+	.GetHullBounds =            GetSymbol<ClientDLLFuncs::GetHullBoundsFn>("hw.so"s, "_Z23ClientDLL_GetHullBoundsiPfS_"s),
+	.ConnectionLessPacket =     GetSymbol<ClientDLLFuncs::ConnectionLessPacketFn>("hw.so"s, "_Z30ClientDLL_ConnectionlessPacketPK8netadr_sPKcPcPi"s),
+	.PostRunCmd =               GetSymbol<ClientDLLFuncs::PostRunCmdFn>("hw.so"s, "_Z20ClientDLL_PostRunCmdP13local_state_sS0_P9usercmd_sidj"s),
+	.StudioEvent =              GetSymbol<ClientDLLFuncs::StudioEventFn>("hw.so"s, "_Z21ClientDLL_StudioEventPK14mstudioevent_sPK11cl_entity_s"s),
+	.DrawNormalTriangles =      GetSymbol<ClientDLLFuncs::DrawNormalTrianglesFn>("hw.so"s, "_Z29ClientDLL_DrawNormalTrianglesv"s),
+	.DrawTransparentTriangles = GetSymbol<ClientDLLFuncs::DrawTransparentTrianglesFn>("hw.so"s, "_Z34ClientDLL_DrawTransparentTrianglesv"s),
+	.CreateEntities =           GetSymbol<ClientDLLFuncs::CreateEntitiesFn>("hw.so"s, "_Z24ClientDLL_CreateEntitiesv"s),
+	.AddEntity =                GetSymbol<ClientDLLFuncs::AddEntityFn>("hw.so"s, "_Z19ClientDLL_AddEntityiP11cl_entity_s"s),
+	.CalcRefDef =               GetSymbol<ClientDLLFuncs::CalcRefDefFn>("hw.so"s, "_Z20ClientDLL_CalcRefdefP12ref_params_s"s),
+	.CamThink =                 GetSymbol<ClientDLLFuncs::CamThinkFn>("hw.so"s, "_Z19ClientDLL_CAM_Thinkv"s),
+	.FindKey =                  GetSymbol<ClientDLLFuncs::FindKeyFn>("hw.so"s, "_Z17ClientDLL_FindKeyPKc"s),
+	.GetCameraOffsets =         GetSymbol<ClientDLLFuncs::GetCameraOffsetsFn>("hw.so"s, "_Z26ClientDLL_GetCameraOffsetsPf"s),
+	.IsThirdPerson =            GetSymbol<ClientDLLFuncs::IsThirdPersonFn>("hw.so"s, "_Z23ClientDLL_IsThirdPersonv"s),
+	.CreateMove =               GetSymbol<ClientDLLFuncs::CreateMoveFn>("hw.so"s, "_Z20ClientDLL_CreateMovefP9usercmd_si"s),
+	.ActivateMouse =            GetSymbol<ClientDLLFuncs::ActivateMouseFn>("hw.so"s, "_Z23ClientDLL_ActivateMousev"s),
+	.DeactivateMouse =          GetSymbol<ClientDLLFuncs::DeactivateMouseFn>("hw.so"s, "_Z25ClientDLL_DeactivateMousev"s),
+	.MouseEvent =               GetSymbol<ClientDLLFuncs::MouseEventFn>("hw.so"s, "_Z20ClientDLL_MouseEventi"s),
+	.ClearStates =              GetSymbol<ClientDLLFuncs::ClearStatesFn>("hw.so"s, "_Z21ClientDLL_ClearStatesv"s),
+	.Accumulate =               GetSymbol<ClientDLLFuncs::AccumulateFn>("hw.so"s, "_Z23ClientDLL_IN_Accumulatev"s),
+	.ClientMoveInit =           GetSymbol<ClientDLLFuncs::ClientMoveInitFn>("hw.so"s, "_Z24ClientDLL_ClientMoveInitP12playermove_s"s),
+	.ClientTextureType =        GetSymbol<ClientDLLFuncs::ClientTextureTypeFn>("hw.so"s, "_Z27ClientDLL_ClientTextureTypePc"s),
+	.ClientMove =               GetSymbol<ClientDLLFuncs::ClientMoveFn>("hw.so"s, "_Z20ClientDLL_MoveClientP12playermove_s"s),
+	.Shutdown =                 GetSymbol<ClientDLLFuncs::ShutdownFn>("hw.so"s, "_Z18ClientDLL_Shutdownv"s),
+	.HudVidInit =               GetSymbol<ClientDLLFuncs::HudVidInitFn>("hw.so"s, "_Z20ClientDLL_HudVidInitv"s),
+	//_Z17ClientDLL_HudInitv
+	.HudRedraw =                GetSymbol<ClientDLLFuncs::HudRedrawFn>("hw.so"s, "_Z19ClientDLL_HudRedrawi"s),
+	.Frame =                    GetSymbol<ClientDLLFuncs::FrameFn>("hw.so"s, "_Z15ClientDLL_Framed"s),
+	.UpdateClientData =         GetSymbol<ClientDLLFuncs::UpdateClientDataFn>("hw.so"s, "_Z26ClientDLL_UpdateClientDatav"s),
+	//_Z30ClientDLL_DemoUpdateClientDataP13client_data_s
+	.TxferLocalOverrides =      GetSymbol<ClientDLLFuncs::TxferLocalOverridesFn>("hw.so"s, "_Z29ClientDLL_TxferLocalOverridesP14entity_state_sPK12clientdata_s"s),
+	.ProcessPlayerState =       GetSymbol<ClientDLLFuncs::ProcessPlayerStateFn>("hw.so"s, "_Z28ClientDLL_ProcessPlayerStateP14entity_state_sPKS_"s),
+	.TxferPredictionData =      GetSymbol<ClientDLLFuncs::TxferPredictionDataFn>("hw.so"s, "_Z29ClientDLL_TxferPredictionDataP14entity_state_sPKS_P12clientdata_sPKS3_P13weapon_data_sPKS7_"s),
+	.ReadDemoBuffer =           GetSymbol<ClientDLLFuncs::ReadDemoBufferFn>("hw.so"s, "_Z24ClientDLL_ReadDemoBufferiPh"s),
+	//_Z30ClientDLL_CheckStudioInterfacePv
+	};
 }
