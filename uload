@@ -10,6 +10,8 @@ if grep -q "$filename" /proc/"$sven_pid"/maps; then
 		-ex "set logging file /dev/null" \
 		-ex "set logging redirect on" \
 		-ex "attach $sven_pid" \
+		-ex "b SDL_GL_SwapWindow" \
+  		-ex "c" \
 		-ex "set \$dlopen = (void*(*)(char*, int)) dlopen" \
 		-ex "set \$dlclose = (int(*)(void*)) dlclose" \
 		-ex "set \$library = \$dlopen(\"$filename\", 6)" \

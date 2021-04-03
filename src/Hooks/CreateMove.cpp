@@ -1,6 +1,8 @@
 #include "Hooks.hpp"
 #include "../Util/Hooker.hpp"
 
+#include "../Hacks/AntiAim.hpp"
+
 static u8 hookCreateMovePatch[4] = { 0, 0, 0, 0 };
 Tramp* createMoveHook = nullptr;
 
@@ -11,6 +13,7 @@ void Hooks::CreateMove(f32 frameTime, UserCmd* cmd, i32 active)
 	if (!cmd)
 		return;
 
+	AntiAim::CreateMove(cmd);
 }
 
 void CreateMove::HookCreateMove()

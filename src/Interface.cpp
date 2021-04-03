@@ -220,13 +220,18 @@ std::uintptr_t Interface::GetBaseAddress()
 template <class T>
 static T GetSymbol(std::string filename, std::string symbol)
 {
-	T addr = GetSymbolAddress<T>(filename.c_str(), symbol.c_str());
-	if (addr == nullptr)
+	void* handle = dlopen(filename.c_str(), RTLD_NOW | RTLD_LOCAL);
+	if (handle == nullptr)
+		throw Exception("GetSymbol() Failed to get handle of file '{}'", filename);
+
+	void* p = dlsym(handle, symbol.c_str());
+	dlclose(handle);
+	if (p == nullptr)
 		throw Exception("GetSymbol() Could not get symbol address for '{0}' in '{1}'", Demangle(symbol.c_str()), filename);
 
 	fmt::print("({1}) found '{0}'\n", Demangle(symbol.c_str()), filename);
 	
-	return addr;
+	return reinterpret_cast<T>(p);
 }
 
 void Interface::FindClientDLLFuncs()
@@ -274,4 +279,11 @@ void Interface::FindClientDLLFuncs()
 	.ReadDemoBuffer =           GetSymbol<ClientDLLFuncs::ReadDemoBufferFn>("hw.so"s, "_Z24ClientDLL_ReadDemoBufferiPh"s),
 	//_Z30ClientDLL_CheckStudioInterfacePv
 	};
+}
+
+GetLocalPlayerFn GetLocalPlayer = nullptr;
+
+void Interface::FindFunctions()
+{
+	//GetLocalPlayer = GetSymbol<GetLocalPlayerFn>("hw.so"s, "hw.GetLocalPlayer_I"s);
 }

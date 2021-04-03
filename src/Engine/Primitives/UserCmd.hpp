@@ -9,21 +9,15 @@ struct UserCmd
 {
 	i16 lerp_msec; // Interpolation time on client
 	u8 msec; // Duration in ms of command
-	QAngle viewangles; // Command view angles.
+	QAngle viewAngles; // Command view angles.
 
-	//float forwardmove;    // Forward velocity.
-	//float sidemove;       // Sideways velocity.
-	//float upmove;         // Upward velocity.
-	MAKE_CENUMV_Q(MoveDirection, u8,
-		FORWARD, 0,
-		SIDE, 1,
-		UP, 2,
-	);
-	Vec3 vel; // foward, side, upward
-	u8 lightlevel; // Light level at spot where we are standing.
+	float forwardmove;    // Forward velocity.
+	float sidemove;       // Sideways velocity.
+	float upmove;         // Upward velocity.
+	u8 lightLevel; // Light level at spot where we are standing.
 	u16 buttons; // Attack buttons
 	u8 impulse; // Impulse command issued.
-	u8 weaponselect; // Current weapon id
+	u8 weaponSelect; // Current weapon id
 
 	// Experimental player impact stuff.
 	u32 impact_index;

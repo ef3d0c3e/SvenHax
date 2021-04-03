@@ -32,6 +32,9 @@ extern CVGuiSystemModuleLoader* moduleLoader;
 extern CServerBrowser* serverBrowser;
 extern CDefaultCvar* cvar;
 
+typedef i32 (*GetLocalPlayerFn)(void);
+extern GetLocalPlayerFn GetLocalPlayer;
+
 namespace Interface
 {
 	void FindInterfaces();
@@ -41,6 +44,7 @@ namespace Interface
 	std::uintptr_t GetBaseAddress();
 
 	void FindClientDLLFuncs();
+	void FindFunctions();
 }
 
 #endif // INTERFACE_HPP

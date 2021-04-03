@@ -37,6 +37,8 @@ echo "2" | tee /proc/sys/kernel/yama/ptrace_scope # Only allows root to inject c
 input="$(
 sudo gdb -n -q -batch-silent \
   -ex "attach $sven_pid" \
+  -ex "b SDL_GL_SwapWindow" \
+  -ex "c" \
   -ex "set \$dlopen = (void*(*)(char*, int)) dlopen" \
   -ex "call \$dlopen(\"$(pwd)/$filename\", 2)" \
   -ex "detach" \

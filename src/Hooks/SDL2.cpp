@@ -1,21 +1,29 @@
 #ifndef HOOKS_SDL2_HPP
 #define HOOKS_SDL2_HPP
 
-#include "../ImGUI/imgui.h"
-#include "../ImGUI/examples/imgui_impl_opengles3.h"
-#include "../ImGUI/examples/libs/gl3w/GL/gl3w.h"
-#include "../ImGUI/imgui_internal.h" // for 	ImGui::GetCurrentContext()->Font->DisplayOffset
+#include "../ImGui/imgui.h"
+#include "../ImGui/examples/imgui_impl_opengles3.h"
+#include "../ImGui/examples/libs/gl3w/GL/gl3w.h"
+#include "../ImGui/imgui_internal.h" // for 	ImGui::GetCurrentContext()->Font->DisplayOffset
 #include "../Interface.hpp"
 #include "../Settings.hpp"
 #include "../Shortcuts.hpp"
 #include "../UI/UI.hpp"
+#include "../UI/FontPlex.hpp"
+#include "../UI/FontPlexMono.hpp"
+#include "../UI/FontTitle.hpp"
 #include "../Util/Hooker.hpp"
 #include "../Util/Util.hpp"
 #include "Hooks.hpp"
 #include <SDL2/SDL.h>
 
+#include <fmt/format.h>
+
 int SDL2::windowWidth = 0;
 int SDL2::windowHeight = 0;
+ImFont* UI::plex = nullptr;
+ImFont* UI::plex_mono = nullptr;
+ImFont* UI::title_font = nullptr;
 
 
 typedef void (*SDL_GL_SwapWindow_t)(SDL_Window*);
@@ -25,7 +33,6 @@ static u8 hookSwapWindowPatch[4] = { 0, 0, 0, 0 };
 typedef int (*SDL_PollEvent_t)(SDL_Event*);
 Tramp* pollEventHook = nullptr;
 static u8 hookPollEventPatch[4] = { 0, 0, 0, 0 };
-
 
 static void HandleSDLEvent(SDL_Event* event)
 {
@@ -106,6 +113,88 @@ static void SwapWindow(SDL_Window* window)
 		io.KeyMap[ImGuiKey_Y] = SDLK_y;
 		io.KeyMap[ImGuiKey_Z] = SDLK_z;
 
+		// Fonts
+		//io.FontGlobalScale = 0.5f; // We perform expensive upscaling to get some neat looking result, though there should be a cheaper way
+		ImFontConfig config;
+		config.OversampleH = 4;
+		config.OversampleV = 4;
+		config.PixelSnapH = false;
+		config.SizePixels = 40;
+		UI::plex = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_compressed_data_base85, 20.f, &config);
+		UI::plex_mono = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_mono_compressed_data_base85, 20.f, &config);
+		UI::title_font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(title_compressed_data_base85, 40.f, &config);
+
+		
+		// Colors
+		ImVec4* colors = ImGui::GetStyle().Colors;
+		colors[ImGuiCol_Text]                  = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+		colors[ImGuiCol_TextDisabled]          = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+		colors[ImGuiCol_WindowBg]              = ImVec4(0.00f, 0.00f, 0.00f, 0.94f);
+		colors[ImGuiCol_ChildBg]               = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_PopupBg]               = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+		colors[ImGuiCol_Border]                = ImVec4(1.00f, 0.50f, 0.50f, 0.50f);
+		colors[ImGuiCol_BorderShadow]          = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_FrameBg]               = ImVec4(0.00f, 0.00f, 0.00f, 0.54f);
+		colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.37f, 0.14f, 0.14f, 0.67f);
+		colors[ImGuiCol_FrameBgActive]         = ImVec4(0.39f, 0.20f, 0.20f, 0.67f);
+		colors[ImGuiCol_TitleBg]               = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+		colors[ImGuiCol_TitleBgActive]         = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.48f, 0.16f, 0.16f, 1.00f);
+		colors[ImGuiCol_MenuBarBg]             = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+		colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+		colors[ImGuiCol_CheckMark]             = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
+		colors[ImGuiCol_SliderGrab]            = ImVec4(1.00f, 0.19f, 0.19f, 0.40f);
+		colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.89f, 0.00f, 0.19f, 1.00f);
+		colors[ImGuiCol_Button]                = ImVec4(0.19f, 0.19f, 0.39f, 1.00f);
+		colors[ImGuiCol_ButtonHovered]         = ImVec4(0.80f, 0.17f, 0.00f, 1.00f);
+		colors[ImGuiCol_ButtonActive]          = ImVec4(0.89f, 0.00f, 0.19f, 1.00f);
+		colors[ImGuiCol_Header]                = ImVec4(0.33f, 0.35f, 0.36f, 0.53f);
+		colors[ImGuiCol_HeaderHovered]         = ImVec4(0.76f, 0.28f, 0.44f, 0.67f);
+		colors[ImGuiCol_HeaderActive]          = ImVec4(0.47f, 0.47f, 0.47f, 0.67f);
+		colors[ImGuiCol_Separator]             = ImVec4(0.32f, 0.32f, 0.32f, 1.00f);
+		colors[ImGuiCol_SeparatorHovered]      = ImVec4(0.32f, 0.32f, 0.32f, 1.00f);
+		colors[ImGuiCol_SeparatorActive]       = ImVec4(0.32f, 0.32f, 0.32f, 1.00f);
+		colors[ImGuiCol_ResizeGrip]            = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
+		colors[ImGuiCol_ResizeGripHovered]     = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+		colors[ImGuiCol_ResizeGripActive]      = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+		colors[ImGuiCol_PlotLines]             = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+		colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+		colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+		colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+		colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+		colors[ImGuiCol_DragDropTarget]        = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+		colors[ImGuiCol_NavHighlight]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+		colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+		colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+
+		UI::UpdateColors();
+
+	
+		ImGuiStyle* style = &ImGui::GetStyle();
+		style->WindowPadding = ImVec2(0, 0);
+		style->FramePadding = ImVec2(4, 4);
+		style->ItemSpacing = ImVec2(0, 0);
+		style->ItemInnerSpacing = ImVec2(4, 4);
+		style->IndentSpacing = 10;
+		style->ScrollbarSize = 12;
+		style->GrabMinSize = 4;
+		
+		style->WindowRounding = 0;
+		style->ChildRounding = 4;
+		style->FrameRounding = 4;
+		style->PopupRounding = 0;
+		style->ScrollbarRounding = 4;
+		style->GrabRounding = 0;
+		
+		style->WindowBorderSize = 0;
+		style->ChildBorderSize = 0;
+		style->PopupBorderSize = 0;
+		style->FrameBorderSize = 0;
+
 		ImGui_ImplOpenGL3_Init("#version 100");
 
 		bFirst = false;
@@ -114,13 +203,11 @@ static void SwapWindow(SDL_Window* window)
 	ImGuiIO& io = ImGui::GetIO();
 	// Setup display size (every frame to accommodate for window resizing)
 	int w, h;
-	//int display_w, display_h;
 	SDL_GetWindowSize(window, &w, &h);
-	//SDL_GL_GetDrawableSize(window, &display_w, &display_h);
 	SDL2::windowWidth = w;
 	SDL2::windowHeight = h;
 	io.DisplaySize = ImVec2((float)w, (float)h);
-	//io.DisplayFramebufferScale = ImVec2( 1, 1 );
+	io.DisplayFramebufferScale = ImVec2( 1, 1 );
 
 	ImGui_ImplOpenGL3_NewFrame();
 
@@ -133,21 +220,7 @@ static void SwapWindow(SDL_Window* window)
 	io.WantCaptureMouse = UI::isVisible;
 	io.WantCaptureKeyboard = UI::isVisible;
 
-	/*
-	if (UI::isVisible)
-	{
-		SDL_Event event;
-
-		while (SDL_PollEvent(&event))
-		{
-			if (event.type == SDL_QUIT)
-				return;
-
-			HandleSDLEvent(&event);
-		}
-	}*/
-
-	if (true || io.WantCaptureMouse)
+	if (io.WantCaptureMouse)
 	{
 		int mx, my;
 		SDL_GetMouseState(&mx, &my);
@@ -158,6 +231,8 @@ static void SwapWindow(SDL_Window* window)
 	}
 
 	ImGui::NewFrame();
+
+
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
 	ImGui::SetNextWindowBgAlpha(0.0f);
@@ -214,12 +289,11 @@ void SDL2::UnhookWindow()
 
 static int PollEvent(SDL_Event* event)
 {
-	int ret = pollEventHook->GetOriginalFunction<SDL_PollEvent_t>()(event);
 	Shortcuts::PollEvent(event);
 
 	HandleSDLEvent(event);
 
-	return ret;
+	return pollEventHook->GetOriginalFunction<SDL_PollEvent_t>()(event);
 }
 
 void SDL2::HookPollEvent()

@@ -1,7 +1,7 @@
 #ifndef UTIL_DRAW_HPP
 #define UTIL_DRAW_HPP
 
-#include "../ImGUI/imgui.h"
+#include "../ImGui/imgui.h"
 #include "../SDK/SDK.hpp"
 #include "../Engine/Primitives/Vector.hpp"
 #include "../Engine/Primitives/Color.hpp"

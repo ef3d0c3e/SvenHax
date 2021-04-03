@@ -56,6 +56,7 @@ void MainThread()
 		Interface::FindInterfaces();
 
 		Interface::FindClientDLLFuncs();
+		Interface::FindFunctions();
 
 		SDL2::HookSwapWindow();
 		SDL2::HookPollEvent();
