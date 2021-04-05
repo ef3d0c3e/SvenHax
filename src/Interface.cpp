@@ -102,7 +102,7 @@ void Interface::DumpInterfaces()
 
 	for (auto module : modules)
 	{
-		void* library = dlopen(module, RTLD_NOLOAD | RTLD_NOW);
+		void* library = dlopen(module, RTLD_NOLOAD | RTLD_NOW | RTLD_LOCAL);
 
 		if (library == nullptr)
 			continue;
@@ -220,7 +220,7 @@ std::uintptr_t Interface::GetBaseAddress()
 template <class T>
 static T GetSymbol(std::string filename, std::string symbol)
 {
-	void* handle = dlopen(filename.c_str(), RTLD_NOW | RTLD_LOCAL);
+	void* handle = dlopen(filename.c_str(), RTLD_NOW | RTLD_GLOBAL);
 	if (handle == nullptr)
 		throw Exception("GetSymbol() Failed to get handle of file '{}'", filename);
 
@@ -285,5 +285,5 @@ GetLocalPlayerFn GetLocalPlayer = nullptr;
 
 void Interface::FindFunctions()
 {
-	//GetLocalPlayer = GetSymbol<GetLocalPlayerFn>("hw.so"s, "hw.GetLocalPlayer_I"s);
+	//GetLocalPlayer = GetSymbol<GetLocalPlayerFn>("hw.so"s, "_Jv_RegisterClasses"s);
 }

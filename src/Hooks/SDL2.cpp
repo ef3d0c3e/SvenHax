@@ -9,9 +9,9 @@
 #include "../Settings.hpp"
 #include "../Shortcuts.hpp"
 #include "../UI/UI.hpp"
-#include "../UI/FontPlex.hpp"
-#include "../UI/FontPlexMono.hpp"
-#include "../UI/FontTitle.hpp"
+#include "../UI/Res/FontPlex.hpp"
+#include "../UI/Res/FontPlexMono.hpp"
+#include "../UI/Res/FontTitle.hpp"
 #include "../Util/Hooker.hpp"
 #include "../Util/Util.hpp"
 #include "Hooks.hpp"
@@ -118,7 +118,7 @@ static void SwapWindow(SDL_Window* window)
 		ImFontConfig config;
 		config.OversampleH = 4;
 		config.OversampleV = 4;
-		config.PixelSnapH = false;
+		config.PixelSnapH = true;
 		config.SizePixels = 40;
 		UI::plex = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_compressed_data_base85, 20.f, &config);
 		UI::plex_mono = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_mono_compressed_data_base85, 20.f, &config);
@@ -184,7 +184,7 @@ static void SwapWindow(SDL_Window* window)
 		style->GrabMinSize = 4;
 		
 		style->WindowRounding = 0;
-		style->ChildRounding = 4;
+		style->ChildRounding = 0;
 		style->FrameRounding = 4;
 		style->PopupRounding = 0;
 		style->ScrollbarRounding = 4;
@@ -231,18 +231,16 @@ static void SwapWindow(SDL_Window* window)
 	}
 
 	ImGui::NewFrame();
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+		ImGui::SetNextWindowBgAlpha(0.0f);
+		ImGui::Begin("", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
+		Hooks::PaintImGui(); // Process ImGui Draw Commands
+		UI::Draw();
 
-
-	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
-	ImGui::SetNextWindowBgAlpha(0.0f);
-	ImGui::Begin("", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
-
-	UI::Draw();
-
-	Hooks::PaintImGui(); // Process ImGui Draw Commands
-
-	ImGui::End();
+		ImGui::End();
+	}
 	ImGui::EndFrame();
 
 	ImGui::GetCurrentContext()->Font->DisplayOffset = ImVec2(0.f, 0.f);

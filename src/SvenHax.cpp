@@ -17,6 +17,8 @@ std::ofstream Log;
 std::mutex mtx;
 std::condition_variable cv;
 
+SymbolTable symbols;
+
 template <class String>
 inline void Message(const String& format, const auto&... args)
 {
@@ -24,6 +26,8 @@ inline void Message(const String& format, const auto&... args)
 	fmt::print(format, args...);
 	std::cout << "\033[0m\n";
 }
+
+static bool failed = false;;
 
 void MainThread()
 {
@@ -51,6 +55,14 @@ void MainThread()
 		Maps::ParseMaps();
 		std::cout << "* /proc/self/maps parsed\n";
 		Message("Maps parsed");
+
+		symbols.BuildTable();
+
+		for (const auto& s : symbols.m_table)
+			std::cout << s.first << "\n";
+		//auto hw = symbols["hw.so"];
+		//std::cout << "Numc:" << hw.m_symbols.size() << "\n";
+		//std::cout << symbols["hw.so"]["GetLocalPlayer_I"].address;
 	
 		Interface::DumpInterfaces();
 		Interface::FindInterfaces();
@@ -69,6 +81,7 @@ void MainThread()
 		std::cerr << "\033[31m***EXCEPTION CAUGHT***\n";
 		std::cerr << e.what();
 		std::cerr << "\n***END OF EXCEPTION***\033[0m\n";
+		failed = true;
 	}
 
 	Log.close();
@@ -87,9 +100,12 @@ void __attribute__((destructor)) Shutdown()
 	mainThread->join();
 	VMT::ReleaseAllVMTs();
 
-	SDL2::UnhookWindow();
-	SDL2::UnhookPollEvent();
-	CreateMove::UnhookCreateMove();
+	if (!failed)
+	{
+		SDL2::UnhookWindow();
+		SDL2::UnhookPollEvent();
+		CreateMove::UnhookCreateMove();
+	}
 
 	Message("Unloaded");
 }

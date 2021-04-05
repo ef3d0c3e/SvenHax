@@ -4,7 +4,7 @@
 #include "Util/Util.hpp"
 #include "Util/VMT.hpp"
 #include "SDK/SDK.hpp"
-
+#include "Util/Symbol.hpp"
 
 extern CBaseFileSystem* fileSystem;
 extern CDedicatedServerAPI* dedicatedServer;

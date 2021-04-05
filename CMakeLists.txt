@@ -16,6 +16,7 @@ FILE(GLOB SOURCES
 	"src/Hooks/*.cpp"
 	"src/UI/*.cpp"
 	"src/Hacks/*.cpp"
+	"src/incbin/*.c"
 )
 
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/ImGui/")
