@@ -6,6 +6,8 @@
 #include "SDK/SDK.hpp"
 #include "Util/Symbol.hpp"
 
+extern SymbolTable symbols;
+
 extern CBaseFileSystem* fileSystem;
 extern CDedicatedServerAPI* dedicatedServer;
 extern CEngineAPI* engineAPI;
@@ -37,11 +39,9 @@ extern GetLocalPlayerFn GetLocalPlayer;
 
 namespace Interface
 {
+	void FindSymbols();
 	void FindInterfaces();
 	void DumpInterfaces();
-
-	extern std::uintptr_t BaseAddr;
-	std::uintptr_t GetBaseAddress();
 
 	void FindClientDLLFuncs();
 	void FindFunctions();

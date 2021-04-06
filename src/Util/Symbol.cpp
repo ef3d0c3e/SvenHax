@@ -2,41 +2,32 @@
 #include "Util.hpp"
 #include <elf.h>
 
-Library::Library(const std::string& name)
+Library::Library(const std::string& name, const std::deque<E::Symbol>& symbols, const std::deque<Maps::MapEntry>& entries)
 {
-	auto getName = [](const char* name) {
-		const std::string s(name);
-		const auto pos = s.rfind('/');
-		if (pos == std::string::npos)
-			return s;
+	if (entries.empty())
+		return;
 
-		return s.substr(pos + 1);
+	path = entries.front().path;
+	this->name = name;
 
-		/* Gets the name for dlopen() (somewhat)
-		if (strlen(name) < 5) // "/home"
-			return name;
+	address = entries.front().address;
+	size = entries.back().address - address + entries.back().size; // Rough size
 
-		if (strcmp(name, "/home") <= 0)
-			return name;
-		std::string s(name);
-
-		const auto pos = s.find("Sven Co-op/");
-		if (pos == std::string::npos)
-			return s;
-
-		return s.substr(pos + 11);*/
-	};
+	for (const auto& s : symbols)
+	{
+		m_symbols.insert({s.name, E::Resolve(s, entries)});
+	}
 }
 
 Library::~Library()
 {
 }
 
-const E::Symbol& Library::operator[](const std::string& key) const
+std::uintptr_t Library::operator[](const std::string& key) const
 {
 	const auto it = m_symbols.find(key);
 	if (it == m_symbols.end())
-		throw Exception("Library::operator[] Could not get symbol '{0}' in file '{1}'", key, name);
+		throw Exception("Library::operator[] Could not get symbol '{0}' in module '{1}'", key, name);
 
 	return it->second;
 }
@@ -46,10 +37,6 @@ SymbolTable::SymbolTable()
 }
 
 SymbolTable::~SymbolTable()
-{
-}
-
-void SymbolTable::BuildTable()
 {
 }
 

@@ -9,6 +9,8 @@
 #include <memory>
 #include <link.h>
 #include <cxxabi.h>
+#include <deque>
+#include "Maps.hpp"
 
 using namespace std::literals;
 
@@ -140,6 +142,8 @@ public:
 		X, PF_X,
 		W, PF_W,
 		R, PF_R,
+		MASKOS, PF_MASKOS,
+		MASKPROC, PF_MASKPROC,
 	);
 
 	MAKE_CENUM_Q(TagType, Sword,
@@ -253,10 +257,21 @@ public:
 
 	struct Segment
 	{
-		std::string segment_type;
-		SegmentFlag segment_flags;
-		long segment_offset, segment_virtaddr, segment_physaddr, segment_filesize, segment_memsize;
-		int segment_align;
+		//NOTE: the offset of 'flags' differs between x64 and i386
+		SegmentType type;
+		Off offset;
+		Addr vaddr;
+		Addr paddr;
+#if __x86_64__
+		Xword fileSize;
+		Xword memSize;
+		Xword align;
+#else
+		Word fileSize;
+		Word memSize;
+		Word align;
+#endif
+		SegmentFlag flags;
 	};
 
 	struct Symbol
@@ -307,22 +322,22 @@ public:
 	static constexpr void GetSegments(std::uintptr_t library, std::function<void(Segment&&)> callback)
 	{
 		Ehdr* ehdr = reinterpret_cast<Ehdr*>(library);
-		Phdr* phdr = reinterpret_cast<Shdr*>(library + ehdr->e_phoff);
 		Shdr* shdr = reinterpret_cast<Shdr*>(library + ehdr->e_shoff);
+		Phdr* phdr = reinterpret_cast<Phdr*>(library + ehdr->e_phoff);
 		Half num = ehdr->e_shnum;
 
 		for (Half i = 0; i < num; ++i)
 		{
 			Segment s
 			{
-				.segment_type     = phdr[i].p_type,
-				.segment_offset   = phdr[i].p_offset,
-				.segment_virtaddr = phdr[i].p_vaddr,
-				.segment_physaddr = phdr[i].p_paddr,
-				.segment_filesize = phdr[i].p_filesz,
-				.segment_memsize  = phdr[i].p_memsz,
-				.segment_flags    = phdr[i].p_flags,
-				.segment_align    = phdr[i].p_align,
+				.type     = phdr[i].p_type,
+				.offset   = phdr[i].p_offset,
+				.vaddr    = phdr[i].p_vaddr,
+				.paddr    = phdr[i].p_paddr,
+				.fileSize = phdr[i].p_filesz,
+				.memSize  = phdr[i].p_memsz,
+				.align    = phdr[i].p_align,
+				.flags    = phdr[i].p_flags,
 			};
 
 			callback(std::move(s));
@@ -332,7 +347,7 @@ public:
 	static constexpr void GetSections(std::uintptr_t library, std::function<void(Section&&)> callback)
 	{
 		Ehdr* ehdr = reinterpret_cast<Ehdr*>(library);
-		Shdr* shdr = reinterpret_cast<Shdr*>(library + ehdr->e_shoff );
+		Shdr* shdr = reinterpret_cast<Shdr*>((int)library + ehdr->e_shoff);
 		Half num = ehdr->e_shnum;
 
 		const char* strTab = reinterpret_cast<char*>(library) + shdr[ehdr->e_shstrndx].sh_offset;
@@ -359,9 +374,6 @@ public:
 	{
 		std::vector<Section> secs;
 		GetSections(library, [&secs](Section&& s){ secs.push_back(std::move(s)); });
-
-		Ehdr* ehdr = reinterpret_cast<Ehdr*>(library);
-		Shdr* shdr = reinterpret_cast<Shdr*>(library + ehdr->e_shoff);
 
 		// Get strTab
 		const char* strTab = nullptr;
@@ -415,6 +427,22 @@ public:
 				callback(std::move(s));
 			}
 		}
+	}
+
+	constexpr static inline std::uintptr_t Resolve(const Symbol& symbol, const std::deque<Maps::MapEntry>& module)
+	{
+		// We might need a better method
+		if (module.empty())
+			return 0;
+		const std::uintptr_t addr = module.front().address + symbol.value - module.front().offset;
+
+		for (const auto& m : module)
+		{
+			if (m.address > addr)
+				return m.address + symbol.value - m.offset;
+		}
+
+		return module.back().address + symbol.value - module.back().offset;
 	}
 };
 

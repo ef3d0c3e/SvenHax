@@ -60,11 +60,13 @@ void UI::MainWindow()
 		}
 
 		{
-			const float y = bb.Max.y-bb.Min.y+14;
-			static ImU32 color[4] = {0, 0, Settings::Style::tablist_shadow, Settings::Style::tablist_shadow};
-			UI::Shadow(ImGui::GetWindowPos() + ImVec2(0, y-10), ImGui::GetWindowPos() + ImVec2(64, y), color);
-			const float x = 64+(bb.Max.x-bb.Min.x)*tabs.size();
-			UI::Shadow(ImGui::GetWindowPos() + ImVec2(x, y-10), ImGui::GetWindowPos() + ImVec2(ImGui::GetWindowSize().x-x+ImGui::GetCursorPosX(), y), color);
+			const float w = bb.Max.x-bb.Min.x;
+			const float h = bb.Max.y-bb.Min.y;
+			const float y = h+14;
+			static ImU32 color[6] = {0, 0, Settings::Style::tablist_shadow, Settings::Style::tablist_shadow, 0, 0}; // cycling
+			UI::Shadow(ImGui::GetWindowPos() + ImVec2(0, y-10), ImGui::GetWindowPos() + ImVec2(64+(tab)*w, y), color);
+			const float x = 64+(w)*(tab+1);
+			UI::Shadow(ImGui::GetWindowPos() + ImVec2(x, y-10), ImGui::GetWindowPos() + ImVec2(ImGui::GetWindowSize().x, y), color);
 		}
 
 
@@ -80,7 +82,7 @@ void UI::MainWindow()
 		ImGui::EndChild();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(Settings::Style::tablist_line));
-		ImGui::BeginChild("##LINE", ImVec2(0, 4), true);
+		ImGui::BeginChild("##LINE", ImVec2(0, 6), true);
 		ImGui::PopStyleColor();
 		ImGui::EndChild();
 

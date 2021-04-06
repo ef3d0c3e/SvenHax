@@ -1,4 +1,6 @@
 #include "Interface.hpp"
+#include "Engine/ClientDLL.hpp"
+#include <fmt/format.h>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -10,11 +12,14 @@
 #include <link.h>
 #include <set>
 #include <fstream>
-#include <fmt/format.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
-#include "Engine/ClientDLL.hpp"
 
 using namespace std::literals;
+
+SymbolTable symbols;
 
 CBaseFileSystem* fileSystem = nullptr;
 CDedicatedServerAPI* dedicatedServer = nullptr;
@@ -43,6 +48,105 @@ CServerBrowser* serverBrowser = nullptr;
 CDefaultCvar* cvar = nullptr;
 
 ClientDLLFuncs* gClientDllFuncs = nullptr;
+
+void Interface::FindSymbols()
+{
+	std::map<std::string, std::deque<Maps::MapEntry>> maps;
+
+	Maps::ParseMaps([&maps](Maps::MapEntry&& ent)
+	{
+		if (ent.path.empty())
+			return;
+		const auto it = maps.find(ent.path);
+		if (it == maps.end())
+			maps.insert({ent.path, std::deque<Maps::MapEntry>{ent}});
+		else
+			it->second.push_back(std::move(ent));
+	});
+
+	for (const auto& library : maps)
+	{
+		auto getName = [](const std::string& path) // Get a readable name
+		{
+			const std::string s(path);
+			const auto pos = s.rfind('/');
+			if (pos == std::string::npos)
+				return s;
+
+			return s.substr(pos + 1);
+
+			/* Gets the name for dlopen() (somewhat)
+			if (strlen(name) < 5) // "/home"
+				return name;
+
+			if (strcmp(name, "/home") <= 0)
+				return name;
+			std::string s(name);
+
+			const auto pos = s.find("Sven Co-op/");
+			if (pos == std::string::npos)
+				return s;
+
+			return s.substr(pos + 11);*/
+		};
+
+		const auto name = getName(library.first);
+		if (name.find(".so") == std::string::npos)
+			continue;
+		
+		static constexpr std::array<std::string_view, 14> wantedLibraries // c++20 constexpr std::string when
+		{
+			"steamclient.so"sv,
+			"filesystem_stdio.so"sv,
+			"hw.so"sv,
+			"libSDL2-2.0.so.0"sv,
+			"libdiscord-rpc.so"sv,
+			"libiconv.so.2"sv,
+			"libsteam_api.so"sv,
+			"libtier0.so"sv,
+			"libvstdlib.so"sv,
+			"serverbrowser_linux.so"sv,
+			"client.so"sv,
+			"gameui.so"sv,
+			"vgui.so"sv,
+			"vgui2.so"sv,
+		};
+
+		for (const auto& wanted : wantedLibraries)
+		{
+			if (name.size() < wanted.size() || name.compare(0, wanted.size(), wanted) != 0)
+				continue;
+
+			int fd;
+			fd = open(library.first.c_str(), O_RDONLY);
+			struct stat st;
+			if (fstat(fd, &st) < 0)
+				throw Exception("Interface::FindSymbols() stat failed on '{}'", library.first);
+
+
+			void* mem = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+			if (mem == MAP_FAILED)
+				throw Exception("Interface::FindSymbols() mmap failed");
+
+			std::deque<E::Symbol> symbolList;
+			E::GetSymbols((std::uintptr_t)mem, [&symbolList](E::Symbol&& s)
+			{
+				symbolList.push_back(std::move(s));
+			});
+
+			if (symbolList.empty())
+			{
+				munmap(mem, st.st_size);
+				break;
+			}
+
+			symbols.m_table.insert({name, Library(name, symbolList, library.second)});
+
+			munmap(mem, st.st_size);
+			break;
+		}
+	}
+}
 
 void Interface::FindInterfaces()
 {
@@ -137,84 +241,6 @@ void Interface::DumpInterfaces()
 	}
 
 	std::ofstream("/tmp/svenhaxInterfaces") << ss.str();
-}
-
-std::uintptr_t Interface::BaseAddr = 0;
-std::uintptr_t Interface::GetBaseAddress()
-{
-
-	// Create temp buffers
-	char* memoryBuffer = new char[32];
-	char* memoryAddressBuffer = new char[32];
-
-	// Create file path
-	char filePath[64];
-	sprintf(filePath, "/proc/%d/maps", getpid());
-
-	// Open target virtual memory
-	int fd = open(filePath, O_RDONLY);
-	if (!fd)
-		return 0;
-
-	// Read memory into buffer
-	if (read(fd, memoryBuffer, sizeof(char) * 32) == -1)
-	{
-		std::string msg;
-		switch (errno)
-		{
-			case EAGAIN:
-				msg = "The file descriptor fd refers to a file other than a socket and has been marked nonblocking (O_NONBLOCK), and the read would block.  See open(2) for further details on the O_NONBLOCK flag. The file descriptor fd refers to a socket and has been marked nonblocking (O_NONBLOCK), and the read would block.  POSIX.1-2001 allows either error to be returned for this case,  and  does  not require these constants to have the same value, so a portable application should check for both possibilities.";
-				break;
-			case EBADF:
-				msg = "fd is not a valid file descriptor or is not open for reading.";
-				break;
-			case EFAULT: 
-				msg = "buf is outside your accessible address space.";
-				break;
-			case EINTR:
-				msg = "The call was interrupted by a signal before any data was read; see signal(7).";
-				break;
-			case EINVAL:
-				msg = "fd  is  attached  to an object which is unsuitable for reading; or the file was opened with the O_DIRECT flag, and either the address specified in buf, the value specified in count, or the file offset is not suitably aligned. fd was created via a call to timerfd_create(2) and the wrong size buffer was given to read(); see timerfd_create(2) for further information.";
-				break;
-			case EIO:
-				msg = "I/O error.  This will happen for example when the process is in a background process group, tries to read from its controlling terminal, and either it is ignoring or  blocking  SIGTTIN  or  its process  group  is orphaned.  It may also occur when there is a low-level I/O error while reading from a disk or tape.  A further possible cause of EIO on networked filesystems is when an advisory lock had been taken out on the file descriptor and this lock has been lost.  See the Lost locks section of fcntl(2) for further details.";
-				break;
-			case EISDIR:
-				msg = "fd refers to a directory.";
-				break;
-		}
-		throw Exception(msg);
-	}
-
-	int StatusIndex = 0;
-
-	// Scan map
-	while (true)
-	{
-		// Check for null byte or newline character
-		if (memoryBuffer[StatusIndex] == '-' || memoryBuffer[StatusIndex] == '\n' || memoryBuffer[StatusIndex] == 0)
-		{
-			memoryAddressBuffer[StatusIndex] = 0;
-			break;
-		}
-
-		// Read memory to szProcessNameBuffer
-		memoryAddressBuffer[StatusIndex] = memoryBuffer[StatusIndex];
-		StatusIndex++;
-	}
-
-	// Close fd
-	close(fd);
-
-	// Convert ascii to hex address
-	std::uintptr_t baseAddress = static_cast<std::uintptr_t>(strtol(memoryAddressBuffer, NULL, 16));
-
-	// Free memory
-	delete[] memoryBuffer;
-	delete[] memoryAddressBuffer;
-
-	return baseAddress;
 }
 
 template <class T>

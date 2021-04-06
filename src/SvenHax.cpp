@@ -17,8 +17,6 @@ std::ofstream Log;
 std::mutex mtx;
 std::condition_variable cv;
 
-SymbolTable symbols;
-
 template <class String>
 inline void Message(const String& format, const auto&... args)
 {
@@ -47,22 +45,11 @@ void MainThread()
 
 	try
 	{
-		Interface::BaseAddr = Interface::GetBaseAddress();
-		Log << std::hex << " * Interface::BaseAddr=" << Interface::BaseAddr << "\n";
-		Log.flush();
-		Message("Base address found: {0:#x}", Interface::BaseAddr);
+		Interface::FindSymbols();
 
-		Maps::ParseMaps();
-		std::cout << "* /proc/self/maps parsed\n";
-		Message("Maps parsed");
-
-		symbols.BuildTable();
-
-		for (const auto& s : symbols.m_table)
-			std::cout << s.first << "\n";
-		//auto hw = symbols["hw.so"];
-		//std::cout << "Numc:" << hw.m_symbols.size() << "\n";
-		//std::cout << symbols["hw.so"]["GetLocalPlayer_I"].address;
+		for (const auto& ad : symbols["hw.so"].m_symbols)
+			std::cout << ad.first  << ":" << ad.second << "\n";
+		//std::cout << "dll:" << ["ClientDLL_Frame(double)"] << "\n";
 	
 		Interface::DumpInterfaces();
 		Interface::FindInterfaces();

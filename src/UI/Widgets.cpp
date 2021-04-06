@@ -400,6 +400,36 @@ static bool SliderBehavior(const ImRect& frame_bb, ImGuiID id, ImGuiDataType dat
 	return false;
 }
 
+bool InputScalarAsWidgetReplacement(const ImRect& bb, ImGuiID id, const char* label, ImGuiDataType data_type, void* data_ptr, const char* format)
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+
+    // Our replacement widget will override the focus ID (registered previously to allow for a TAB focus to happen)
+    // On the first frame, g.ScalarAsInputTextId == 0, then on subsequent frames it becomes == id
+	ImGui::SetActiveID(g.ScalarAsInputTextId, window);
+    g.ActiveIdAllowNavDirFlags = (1 << ImGuiDir_Up) | (1 << ImGuiDir_Down);
+	ImGui::SetHoveredID(0);
+	ImGui::FocusableItemUnregister(window);
+
+    char fmt_buf[32];
+    char data_buf[32];
+    format = ImParseFormatTrimDecorations(format, fmt_buf, IM_ARRAYSIZE(fmt_buf));
+    DataTypeFormatString(data_buf, IM_ARRAYSIZE(data_buf), data_type, data_ptr, format);
+    ImStrTrimBlanks(data_buf);
+    ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ((data_type == ImGuiDataType_Float || data_type == ImGuiDataType_Double) ? ImGuiInputTextFlags_CharsScientific : ImGuiInputTextFlags_CharsDecimal);
+    bool value_changed = UI::InputText(label, data_buf, IM_ARRAYSIZE(data_buf), bb.GetSize(), flags);
+    if (g.ScalarAsInputTextId == 0)     // First frame we started displaying the InputText widget
+    {
+        IM_ASSERT(g.ActiveId == id);    // InputText ID expected to match the Slider ID
+        g.ScalarAsInputTextId = g.ActiveId;
+		ImGui::SetHoveredID(id);
+    }
+    if (value_changed)
+        return DataTypeApplyOpFromText(data_buf, g.InputTextState.InitialText.begin(), data_type, data_ptr, NULL);
+    return false;
+}
+
 static bool SliderScalar(const char* label, ImGuiDataType data_type, void* v, const void* v_min, const void* v_max, const char* format = NULL, float power = 1.f)
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -447,7 +477,7 @@ static bool SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
 		}
 	}
 	if (start_text_input || (g.ActiveId == id && g.ScalarAsInputTextId == id))
-		return ImGui::InputScalarAsWidgetReplacement(frame_bb, id, label, data_type, v, format);
+		return InputScalarAsWidgetReplacement(frame_bb, id, label, data_type, v, format);
 
 	// Actual slider behavior + render grab
 	ImGui::ItemSize(total_bb, style.FramePadding.y);

@@ -3,8 +3,7 @@
 #include <fstream>
 #include <cstring>
 
-std::vector<Maps::maps_entry_t> Maps::mapsEntries;
-void Maps::ParseMaps()
+void Maps::ParseMaps(std::function<void(MapEntry&&)> callback)
 {
 	std::ifstream file("/proc/self/maps");
 	if (!file.is_open())
@@ -13,7 +12,7 @@ void Maps::ParseMaps()
 	std::string line;
 	while (std::getline(file, line))
 	{
-		maps_entry_t ent;
+		MapEntry ent;
 
 		// Address
 		const auto pos1 = line.find('-');
@@ -112,9 +111,9 @@ void Maps::ParseMaps()
 			++i;
 		const auto orig = i;
 		ent.path.resize(line.size() - orig, '\x00');
-		while (i < line.size() && line[i] != '\t' && line[i] != ' ')
+		while (i < line.size() && line[i] != '\t' /*&& line[i] != ' '*/)
 			ent.path[i-orig] = line[i], ++i;
 
-		mapsEntries.push_back(ent);
+		callback(std::move(ent));
 	}
 }

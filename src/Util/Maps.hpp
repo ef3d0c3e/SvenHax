@@ -6,7 +6,7 @@
 
 namespace Maps
 {
-	MAKE_CENUM_Q(Permissions, u8,
+	MAKE_CENUM_Q(Permissions, std::uint8_t,
 		NONE, 0,
 		READ, 1<<0,
 		WRITE, 1<<1,
@@ -14,7 +14,7 @@ namespace Maps
 		PRIVATE, 1<<3,
 	);
 
-	struct maps_entry_t
+	struct MapEntry
 	{
 		std::uintptr_t address = 0;
 		std::uintptr_t size = 0;
@@ -24,9 +24,8 @@ namespace Maps
 		int inode = 0;
 		std::string path = "";
 	};
-	extern std::vector<maps_entry_t> mapsEntries;
 
-	void ParseMaps();
+	void ParseMaps(std::function<void(MapEntry&&)> callback);
 }
 
 #endif // MAPS_HPP
