@@ -4,13 +4,13 @@
 #include <iostream>
 
 #include "Cenum.hpp"
+#include "Maps.hpp"
 #include <string>
 #include <functional>
 #include <memory>
 #include <link.h>
 #include <cxxabi.h>
 #include <deque>
-#include "Maps.hpp"
 
 using namespace std::literals;
 
@@ -372,9 +372,14 @@ public:
 
 	static constexpr void GetSymbols(std::uintptr_t library, std::function<void(Symbol&&)> callback)
 	{
-		std::vector<Section> secs;
+		std::deque<Section> secs;
 		GetSections(library, [&secs](Section&& s){ secs.push_back(std::move(s)); });
 
+		GetSymbols(library, secs, callback);
+	}
+
+	static constexpr void GetSymbols(std::uintptr_t library, const std::deque<Section>& secs, std::function<void(Symbol&&)> callback)
+	{
 		// Get strTab
 		const char* strTab = nullptr;
 		for (const auto& sec: secs)
@@ -429,20 +434,20 @@ public:
 		}
 	}
 
-	constexpr static inline std::uintptr_t Resolve(const Symbol& symbol, const std::deque<Maps::MapEntry>& module)
+	constexpr static inline std::uintptr_t Resolve(const Symbol& symbol, const std::deque<Segment>& segs, const std::deque<Maps::MapEntry>& module)
 	{
-		// We might need a better method
-		if (module.empty())
-			return 0;
 		const std::uintptr_t addr = module.front().address + symbol.value - module.front().offset;
 
+		auto m = module.cbegin();
+		auto s = segs.cbegin();
+		for (; m != module.cend(); ++m, ++s)
 		for (const auto& m : module)
 		{
-			if (m.address > addr)
-				return m.address + symbol.value - m.offset;
+			if (m.address > addr - s->align)
+				return m.address + symbol.value - m.offset - s->align;
 		}
 
-		return module.back().address + symbol.value - module.back().offset;
+		return module.back().address + symbol.value - module.back().offset - segs.back().align;
 	}
 };
 

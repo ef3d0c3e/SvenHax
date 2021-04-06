@@ -2,10 +2,14 @@
 #include "Util.hpp"
 #include <elf.h>
 
-Library::Library(const std::string& name, const std::deque<E::Symbol>& symbols, const std::deque<Maps::MapEntry>& entries)
+Library::Library(const std::string& name, const std::deque<E::Segment>& segs, const std::deque<E::Symbol>& symbols, const std::deque<Maps::MapEntry>& entries)
 {
 	if (entries.empty())
 		return;
+
+	std::cout << "sz: " << segs.size() << " -- " << entries.size() << "\n";
+	if (segs.size() < entries.size())
+		throw Exception("Library::Library() Failed, segs.size() < entries.size() in '{}'", name);
 
 	path = entries.front().path;
 	this->name = name;
@@ -15,7 +19,8 @@ Library::Library(const std::string& name, const std::deque<E::Symbol>& symbols, 
 
 	for (const auto& s : symbols)
 	{
-		m_symbols.insert({s.name, E::Resolve(s, entries)});
+		const auto addr = E::Resolve(s, segs, entries);
+		m_symbols.insert({s.name, addr});
 	}
 }
 

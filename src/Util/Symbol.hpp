@@ -17,7 +17,7 @@ public:
 	std::size_t address;
 	std::size_t size;
 
-	Library(const std::string& name, const std::deque<E::Symbol>& symbols, const std::deque<Maps::MapEntry>& entries);
+	Library(const std::string& name, const std::deque<E::Segment>& segs, const std::deque<E::Symbol>& symbols, const std::deque<Maps::MapEntry>& entries);
 	~Library();
 
 	std::uintptr_t operator[](const std::string& key) const;

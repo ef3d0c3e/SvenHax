@@ -47,10 +47,6 @@ void MainThread()
 	{
 		Interface::FindSymbols();
 
-		for (const auto& ad : symbols["hw.so"].m_symbols)
-			std::cout << ad.first  << ":" << ad.second << "\n";
-		//std::cout << "dll:" << ["ClientDLL_Frame(double)"] << "\n";
-	
 		Interface::DumpInterfaces();
 		Interface::FindInterfaces();
 

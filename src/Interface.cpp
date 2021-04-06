@@ -133,6 +133,11 @@ void Interface::FindSymbols()
 			{
 				symbolList.push_back(std::move(s));
 			});
+			std::deque<E::Segment> segs;
+			E::GetSegments((std::uintptr_t)mem, [&segs](E::Segment&& s)
+			{
+				segs.push_back(std::move(s));
+			});
 
 			if (symbolList.empty())
 			{
@@ -140,7 +145,7 @@ void Interface::FindSymbols()
 				break;
 			}
 
-			symbols.m_table.insert({name, Library(name, symbolList, library.second)});
+			symbols.m_table.insert({name, Library(name, segs, symbolList, library.second)});
 
 			munmap(mem, st.st_size);
 			break;
