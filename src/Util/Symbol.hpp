@@ -34,4 +34,6 @@ public:
 	const Library& operator[](const std::string& key) const;
 };
 
+extern SymbolTable symbols;
+
 #endif // UTIL_SYMBOL_HPP

@@ -248,67 +248,51 @@ void Interface::DumpInterfaces()
 	std::ofstream("/tmp/svenhaxInterfaces") << ss.str();
 }
 
-template <class T>
-static T GetSymbol(std::string filename, std::string symbol)
-{
-	void* handle = dlopen(filename.c_str(), RTLD_NOW | RTLD_GLOBAL);
-	if (handle == nullptr)
-		throw Exception("GetSymbol() Failed to get handle of file '{}'", filename);
-
-	void* p = dlsym(handle, symbol.c_str());
-	dlclose(handle);
-	if (p == nullptr)
-		throw Exception("GetSymbol() Could not get symbol address for '{0}' in '{1}'", Demangle(symbol.c_str()), filename);
-
-	fmt::print("({1}) found '{0}'\n", Demangle(symbol.c_str()), filename);
-	
-	return reinterpret_cast<T>(p);
-}
-
 void Interface::FindClientDLLFuncs()
 {
-	gClientDllFuncs = new ClientDLLFuncs{
-	.Init =                     GetSymbol<ClientDLLFuncs::InitFn>("hw.so"s, "_Z14ClientDLL_Initv"s),
-	.GetUserEntity =            GetSymbol<ClientDLLFuncs::GetUserEntityFn>("hw.so"s, "_Z23ClientDLL_GetUserEntityi"s),
-	.VoiceStatus =              GetSymbol<ClientDLLFuncs::VoiceStatusFn>("hw.so"s, "_Z21ClientDLL_VoiceStatusii"s),
-	.ChatInputPosition =        GetSymbol<ClientDLLFuncs::ChatInputPositionFn>("hw.so"s, "_Z27ClientDLL_ChatInputPositionPiS_"s),
-	.TempEntUpdate =            GetSymbol<ClientDLLFuncs::TempEntUpdateFn>("hw.so"s, "_Z23ClientDLL_TempEntUpdatedddPP9tempent_sS1_PFiP11cl_entity_sEPFvS0_fE"s),
-	.DirectorMessage =          GetSymbol<ClientDLLFuncs::DirectorMessageFn>("hw.so"s, "_Z25ClientDLL_DirectorMessageiPv"s),
-	.KeyEvent =                 GetSymbol<ClientDLLFuncs::KeyEventFn>("hw.so"s, "_Z19ClientDLL_Key_EventiiPKc"s),
-	.GetHullBounds =            GetSymbol<ClientDLLFuncs::GetHullBoundsFn>("hw.so"s, "_Z23ClientDLL_GetHullBoundsiPfS_"s),
-	.ConnectionLessPacket =     GetSymbol<ClientDLLFuncs::ConnectionLessPacketFn>("hw.so"s, "_Z30ClientDLL_ConnectionlessPacketPK8netadr_sPKcPcPi"s),
-	.PostRunCmd =               GetSymbol<ClientDLLFuncs::PostRunCmdFn>("hw.so"s, "_Z20ClientDLL_PostRunCmdP13local_state_sS0_P9usercmd_sidj"s),
-	.StudioEvent =              GetSymbol<ClientDLLFuncs::StudioEventFn>("hw.so"s, "_Z21ClientDLL_StudioEventPK14mstudioevent_sPK11cl_entity_s"s),
-	.DrawNormalTriangles =      GetSymbol<ClientDLLFuncs::DrawNormalTrianglesFn>("hw.so"s, "_Z29ClientDLL_DrawNormalTrianglesv"s),
-	.DrawTransparentTriangles = GetSymbol<ClientDLLFuncs::DrawTransparentTrianglesFn>("hw.so"s, "_Z34ClientDLL_DrawTransparentTrianglesv"s),
-	.CreateEntities =           GetSymbol<ClientDLLFuncs::CreateEntitiesFn>("hw.so"s, "_Z24ClientDLL_CreateEntitiesv"s),
-	.AddEntity =                GetSymbol<ClientDLLFuncs::AddEntityFn>("hw.so"s, "_Z19ClientDLL_AddEntityiP11cl_entity_s"s),
-	.CalcRefDef =               GetSymbol<ClientDLLFuncs::CalcRefDefFn>("hw.so"s, "_Z20ClientDLL_CalcRefdefP12ref_params_s"s),
-	.CamThink =                 GetSymbol<ClientDLLFuncs::CamThinkFn>("hw.so"s, "_Z19ClientDLL_CAM_Thinkv"s),
-	.FindKey =                  GetSymbol<ClientDLLFuncs::FindKeyFn>("hw.so"s, "_Z17ClientDLL_FindKeyPKc"s),
-	.GetCameraOffsets =         GetSymbol<ClientDLLFuncs::GetCameraOffsetsFn>("hw.so"s, "_Z26ClientDLL_GetCameraOffsetsPf"s),
-	.IsThirdPerson =            GetSymbol<ClientDLLFuncs::IsThirdPersonFn>("hw.so"s, "_Z23ClientDLL_IsThirdPersonv"s),
-	.CreateMove =               GetSymbol<ClientDLLFuncs::CreateMoveFn>("hw.so"s, "_Z20ClientDLL_CreateMovefP9usercmd_si"s),
-	.ActivateMouse =            GetSymbol<ClientDLLFuncs::ActivateMouseFn>("hw.so"s, "_Z23ClientDLL_ActivateMousev"s),
-	.DeactivateMouse =          GetSymbol<ClientDLLFuncs::DeactivateMouseFn>("hw.so"s, "_Z25ClientDLL_DeactivateMousev"s),
-	.MouseEvent =               GetSymbol<ClientDLLFuncs::MouseEventFn>("hw.so"s, "_Z20ClientDLL_MouseEventi"s),
-	.ClearStates =              GetSymbol<ClientDLLFuncs::ClearStatesFn>("hw.so"s, "_Z21ClientDLL_ClearStatesv"s),
-	.Accumulate =               GetSymbol<ClientDLLFuncs::AccumulateFn>("hw.so"s, "_Z23ClientDLL_IN_Accumulatev"s),
-	.ClientMoveInit =           GetSymbol<ClientDLLFuncs::ClientMoveInitFn>("hw.so"s, "_Z24ClientDLL_ClientMoveInitP12playermove_s"s),
-	.ClientTextureType =        GetSymbol<ClientDLLFuncs::ClientTextureTypeFn>("hw.so"s, "_Z27ClientDLL_ClientTextureTypePc"s),
-	.ClientMove =               GetSymbol<ClientDLLFuncs::ClientMoveFn>("hw.so"s, "_Z20ClientDLL_MoveClientP12playermove_s"s),
-	.Shutdown =                 GetSymbol<ClientDLLFuncs::ShutdownFn>("hw.so"s, "_Z18ClientDLL_Shutdownv"s),
-	.HudVidInit =               GetSymbol<ClientDLLFuncs::HudVidInitFn>("hw.so"s, "_Z20ClientDLL_HudVidInitv"s),
-	//_Z17ClientDLL_HudInitv
-	.HudRedraw =                GetSymbol<ClientDLLFuncs::HudRedrawFn>("hw.so"s, "_Z19ClientDLL_HudRedrawi"s),
-	.Frame =                    GetSymbol<ClientDLLFuncs::FrameFn>("hw.so"s, "_Z15ClientDLL_Framed"s),
-	.UpdateClientData =         GetSymbol<ClientDLLFuncs::UpdateClientDataFn>("hw.so"s, "_Z26ClientDLL_UpdateClientDatav"s),
-	//_Z30ClientDLL_DemoUpdateClientDataP13client_data_s
-	.TxferLocalOverrides =      GetSymbol<ClientDLLFuncs::TxferLocalOverridesFn>("hw.so"s, "_Z29ClientDLL_TxferLocalOverridesP14entity_state_sPK12clientdata_s"s),
-	.ProcessPlayerState =       GetSymbol<ClientDLLFuncs::ProcessPlayerStateFn>("hw.so"s, "_Z28ClientDLL_ProcessPlayerStateP14entity_state_sPKS_"s),
-	.TxferPredictionData =      GetSymbol<ClientDLLFuncs::TxferPredictionDataFn>("hw.so"s, "_Z29ClientDLL_TxferPredictionDataP14entity_state_sPKS_P12clientdata_sPKS3_P13weapon_data_sPKS7_"s),
-	.ReadDemoBuffer =           GetSymbol<ClientDLLFuncs::ReadDemoBufferFn>("hw.so"s, "_Z24ClientDLL_ReadDemoBufferiPh"s),
-	//_Z30ClientDLL_CheckStudioInterfacePv
+	gClientDllFuncs = new ClientDLLFuncs
+	{
+	.Init = reinterpret_cast<ClientDLLFuncs::InitFn>(symbols["hw.so"s]["ClientDLL_Init()"s]),
+	.GetUserEntity = reinterpret_cast<ClientDLLFuncs::GetUserEntityFn>(symbols["hw.so"s]["ClientDLL_GetUserEntity(int)"s]),
+	.VoiceStatus = reinterpret_cast<ClientDLLFuncs::VoiceStatusFn>(symbols["hw.so"s]["ClientDLL_VoiceStatus(int, int)"s]),
+	.ChatInputPosition = reinterpret_cast<ClientDLLFuncs::ChatInputPositionFn>(symbols["hw.so"s]["ClientDLL_ChatInputPosition(int*, int*)"s]),
+	.TempEntUpdate = reinterpret_cast<ClientDLLFuncs::TempEntUpdateFn>(symbols["hw.so"s]["ClientDLL_TempEntUpdate(double, double, double, tempent_s**, tempent_s**, int (*)(cl_entity_s*), void (*)(tempent_s*, float))"s]),
+	.DirectorMessage = reinterpret_cast<ClientDLLFuncs::DirectorMessageFn>(symbols["hw.so"s]["ClientDLL_DirectorMessage(int, void*)"s]),
+	.KeyEvent = reinterpret_cast<ClientDLLFuncs::KeyEventFn>(symbols["hw.so"s]["ClientDLL_Key_Event(int, int, char const*)"s]),
+	.GetHullBounds = reinterpret_cast<ClientDLLFuncs::GetHullBoundsFn>(symbols["hw.so"s]["ClientDLL_GetHullBounds(int, float*, float*)"s]),
+	.ConnectionLessPacket = reinterpret_cast<ClientDLLFuncs::ConnectionLessPacketFn>(symbols["hw.so"s]["ClientDLL_ConnectionlessPacket(netadr_s const*, char const*, char*, int*)"s]),
+	.PostRunCmd = reinterpret_cast<ClientDLLFuncs::PostRunCmdFn>(symbols["hw.so"s]["ClientDLL_PostRunCmd(local_state_s*, local_state_s*, usercmd_s*, int, double, unsigned int)"s]),
+	.StudioEvent = reinterpret_cast<ClientDLLFuncs::StudioEventFn>(symbols["hw.so"s]["ClientDLL_StudioEvent(mstudioevent_s const*, cl_entity_s const*)"s]),
+	.DrawNormalTriangles = reinterpret_cast<ClientDLLFuncs::DrawNormalTrianglesFn>(symbols["hw.so"s]["ClientDLL_DrawNormalTriangles()"s]),
+	.DrawTransparentTriangles = reinterpret_cast<ClientDLLFuncs::DrawTransparentTrianglesFn>(symbols["hw.so"s]["ClientDLL_DrawTransparentTriangles()"s]),
+	.CreateEntities = reinterpret_cast<ClientDLLFuncs::CreateEntitiesFn>(symbols["hw.so"s]["ClientDLL_CreateEntities()"s]),
+	.AddEntity = reinterpret_cast<ClientDLLFuncs::AddEntityFn>(symbols["hw.so"s]["ClientDLL_AddEntity(int, cl_entity_s*)"s]),
+	.CalcRefDef = reinterpret_cast<ClientDLLFuncs::CalcRefDefFn>(symbols["hw.so"s]["ClientDLL_CalcRefdef(ref_params_s*)"s]),
+	.CamThink = reinterpret_cast<ClientDLLFuncs::CamThinkFn>(symbols["hw.so"s]["ClientDLL_CAM_Think()"s]),
+	.FindKey = reinterpret_cast<ClientDLLFuncs::FindKeyFn>(symbols["hw.so"s]["ClientDLL_FindKey(char const*)"s]),
+	.GetCameraOffsets = reinterpret_cast<ClientDLLFuncs::GetCameraOffsetsFn>(symbols["hw.so"s]["ClientDLL_GetCameraOffsets(float*)"s]),
+	.IsThirdPerson = reinterpret_cast<ClientDLLFuncs::IsThirdPersonFn>(symbols["hw.so"s]["ClientDLL_IsThirdPerson()"s]),
+	.CreateMove = reinterpret_cast<ClientDLLFuncs::CreateMoveFn>(symbols["hw.so"s]["ClientDLL_CreateMove(float, usercmd_s*, int)"s]),
+	.ActivateMouse = reinterpret_cast<ClientDLLFuncs::ActivateMouseFn>(symbols["hw.so"s]["ClientDLL_ActivateMouse()"s]),
+	.DeactivateMouse = reinterpret_cast<ClientDLLFuncs::DeactivateMouseFn>(symbols["hw.so"s]["ClientDLL_DeactivateMouse()"s]),
+	.MouseEvent = reinterpret_cast<ClientDLLFuncs::MouseEventFn>(symbols["hw.so"s]["ClientDLL_MouseEvent(int)"s]),
+	.ClearStates = reinterpret_cast<ClientDLLFuncs::ClearStatesFn>(symbols["hw.so"s]["ClientDLL_ClearStates()"s]),
+	.Accumulate = reinterpret_cast<ClientDLLFuncs::AccumulateFn>(symbols["hw.so"s]["ClientDLL_IN_Accumulate()"s]),
+	.ClientMoveInit = reinterpret_cast<ClientDLLFuncs::ClientMoveInitFn>(symbols["hw.so"s]["ClientDLL_ClientMoveInit(playermove_s*)"s]),
+	.ClientTextureType = reinterpret_cast<ClientDLLFuncs::ClientTextureTypeFn>(symbols["hw.so"s]["ClientDLL_ClientTextureType(char*)"s]),
+	.ClientMove = reinterpret_cast<ClientDLLFuncs::ClientMoveFn>(symbols["hw.so"s]["ClientDLL_MoveClient(playermove_s*)"s]),
+	.Shutdown = reinterpret_cast<ClientDLLFuncs::ShutdownFn>(symbols["hw.so"s]["ClientDLL_Shutdown()"s]),
+	.HudVidInit = reinterpret_cast<ClientDLLFuncs::HudVidInitFn>(symbols["hw.so"s]["ClientDLL_HudVidInit()"s]),
+	//ClientDLL_HudInit()
+	.HudRedraw = reinterpret_cast<ClientDLLFuncs::HudRedrawFn>(symbols["hw.so"s]["ClientDLL_HudRedraw(int)"s]),
+	.Frame = reinterpret_cast<ClientDLLFuncs::FrameFn>(symbols["hw.so"s]["ClientDLL_Frame(double)"s]),
+	.UpdateClientData = reinterpret_cast<ClientDLLFuncs::UpdateClientDataFn>(symbols["hw.so"s]["ClientDLL_UpdateClientData()"s]),
+	//ClientDLL_DemoUpdateClientData(client_data_s*)
+	.TxferLocalOverrides = reinterpret_cast<ClientDLLFuncs::TxferLocalOverridesFn>(symbols["hw.so"s]["ClientDLL_TxferLocalOverrides(entity_state_s*, clientdata_s const*)"s]),
+	.ProcessPlayerState = reinterpret_cast<ClientDLLFuncs::ProcessPlayerStateFn>(symbols["hw.so"s]["ClientDLL_ProcessPlayerState(entity_state_s*, entity_state_s const*)"s]),
+	.TxferPredictionData = reinterpret_cast<ClientDLLFuncs::TxferPredictionDataFn>(symbols["hw.so"s]["ClientDLL_TxferPredictionData(entity_state_s*, entity_state_s const*, clientdata_s*, clientdata_s const*, weapon_data_s*, weapon_data_s const*)"s]),
+	.ReadDemoBuffer = reinterpret_cast<ClientDLLFuncs::ReadDemoBufferFn>(symbols["hw.so"s]["ClientDLL_ReadDemoBuffer(int, unsigned char*)"s]),
+	//ClientDLL_CheckStudioInterface(void*)
 	};
 }
 
@@ -316,5 +300,5 @@ GetLocalPlayerFn GetLocalPlayer = nullptr;
 
 void Interface::FindFunctions()
 {
-	//GetLocalPlayer = GetSymbol<GetLocalPlayerFn>("hw.so"s, "_Jv_RegisterClasses"s);
+	GetLocalPlayer = reinterpret_cast<decltype(GetLocalPlayer)>(symbols["hw.so"s]["GetLocalPlayer_I"s]);
 }

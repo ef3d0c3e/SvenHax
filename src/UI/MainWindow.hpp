@@ -9,6 +9,7 @@ namespace UI
 	void MainWindow();
 
 	void AimTab();
+	void AntiAimTab();
 }
 
 #endif // UI_MAINWINDOW_HPP

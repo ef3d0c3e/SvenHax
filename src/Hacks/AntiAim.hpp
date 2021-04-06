@@ -11,4 +11,9 @@ namespace AntiAim
 	void CreateMove(UserCmd* cmd);
 }
 
+namespace Settings::AA
+{
+	extern bool enabled;
+}
+
 #endif // HACKS_ANTIAIM_HPP

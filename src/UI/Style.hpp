@@ -34,7 +34,7 @@ namespace Style
 	static float selector_shadow_scale = 0.05f;
 
 	// Sliders
-	static float slider_thickness = 0.3f;
+	static float slider_thickness = 0.25f;
 	static float grab_radius = 8.f;
 	static float slider_value_offset = 10.f;
 	static ImU32 slider_grab = 0xFFB5B5B5;

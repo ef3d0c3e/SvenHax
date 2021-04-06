@@ -322,7 +322,6 @@ public:
 	static constexpr void GetSegments(std::uintptr_t library, std::function<void(Segment&&)> callback)
 	{
 		Ehdr* ehdr = reinterpret_cast<Ehdr*>(library);
-		Shdr* shdr = reinterpret_cast<Shdr*>(library + ehdr->e_shoff);
 		Phdr* phdr = reinterpret_cast<Phdr*>(library + ehdr->e_phoff);
 		Half num = ehdr->e_shnum;
 

@@ -154,6 +154,20 @@ std::basic_string<T> StringConvert(const std::basic_string<U>& s)
 	}
 }
 
+template <class T, class ... Ts>
+constexpr std::array<T, sizeof...(Ts)+1> make_array(T t, Ts... ts)
+{
+	static_assert( ((std::is_same_v<T, Ts>) && ...) );
+
+	std::array<T, sizeof...(Ts)+1> a;
+
+	std::size_t i = 1;
+	a[0] = t;
+	((a[i++] = ts), ...);
+
+	return a;
+}
+
 Elf64_Word GetProtectionFlags(std::uintptr_t address);
 
 extern long pageSize;

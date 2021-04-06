@@ -6,8 +6,6 @@
 #include "SDK/SDK.hpp"
 #include "Util/Symbol.hpp"
 
-extern SymbolTable symbols;
-
 extern CBaseFileSystem* fileSystem;
 extern CDedicatedServerAPI* dedicatedServer;
 extern CEngineAPI* engineAPI;

@@ -9,13 +9,16 @@
 #include "../Settings.hpp"
 #include "../Shortcuts.hpp"
 #include "../UI/UI.hpp"
-#include "../UI/Res/FontPlex.hpp"
-#include "../UI/Res/FontPlexMono.hpp"
-#include "../UI/Res/FontTitle.hpp"
 #include "../Util/Hooker.hpp"
 #include "../Util/Util.hpp"
 #include "Hooks.hpp"
 #include <SDL2/SDL.h>
+
+#define INCBIN_PREFIX res
+#include "../incbin/incbin.h"
+INCBIN(IBMPlexSansBold, "../src/UI/Res/IBMPlexSans-Bold.ttf");
+INCBIN(IBMPlexMonoText, "../src/UI/Res/IBMPlexMono-Text.ttf");
+INCBIN(MinecraftiaRegular, "../src/UI/Res/Minecraftia-Regular.ttf");
 
 #include <fmt/format.h>
 
@@ -120,9 +123,10 @@ static void SwapWindow(SDL_Window* window)
 		config.OversampleV = 4;
 		config.PixelSnapH = true;
 		config.SizePixels = 40;
-		UI::plex = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_compressed_data_base85, 20.f, &config);
-		UI::plex_mono = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_mono_compressed_data_base85, 20.f, &config);
-		UI::title_font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(title_compressed_data_base85, 40.f, &config);
+		//UI::plex = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_compressed_data_base85, 20.f, &config);
+		UI::plex = io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(resIBMPlexSansBoldData), resIBMPlexSansBoldSize, 20.f, &config);
+		UI::plex_mono = io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(resIBMPlexMonoTextData), resIBMPlexMonoTextSize, 20.f, &config);
+		UI::title_font = io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(resMinecraftiaRegularData), resMinecraftiaRegularSize, 40.f, &config);
 
 		
 		// Colors

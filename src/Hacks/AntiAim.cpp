@@ -1,6 +1,8 @@
 #include "AntiAim.hpp"
 #include "../Interface.hpp"
 
+bool Settings::AA::enabled = true;
+
 QAngle AntiAim::previousAngle = QAngle(0.f, 0.f, 0.f);
 void AntiAim::CreateMove(UserCmd* cmd)
 {

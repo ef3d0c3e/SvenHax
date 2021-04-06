@@ -13,7 +13,6 @@
 #include "Interface.hpp"
 #include "Hooks/Hooks.hpp"
 
-std::ofstream Log;
 std::mutex mtx;
 std::condition_variable cv;
 
@@ -30,18 +29,6 @@ static bool failed = false;;
 void MainThread()
 {
 	Message("Loading...");
-	//TODO: wait till we can use ofstream...
-	{
-		std::unique_lock<std::mutex> lck(mtx);
-		cv.wait(lck, []()
-		{
-			Log.open("/tmp/svenhax.log");
-			return Log.is_open();
-		});
-	}
-
-	Log << " * PID=" << getpid() << "\n";
-	Log.flush();
 
 	try
 	{
@@ -66,8 +53,6 @@ void MainThread()
 		std::cerr << "\n***END OF EXCEPTION***\033[0m\n";
 		failed = true;
 	}
-
-	Log.close();
 }
 
 std::thread* mainThread = nullptr;
