@@ -2,6 +2,7 @@
 #define HOOKS_HOOKS_HPP
 
 #include "../SDK/SDK.hpp"
+#include "../Interface.hpp"
 #include "../Engine/ClientDLL.hpp"
 
 namespace Hooks
@@ -16,6 +17,9 @@ namespace Hooks
 
 namespace CreateMove
 {
+	extern bool sendPacket;
+	extern QAngle lastViewAngles;
+
 	void HookCreateMove();
 	void UnhookCreateMove();
 }

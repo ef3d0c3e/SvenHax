@@ -6,6 +6,8 @@
 static u8 hookCreateMovePatch[4] = { 0, 0, 0, 0 };
 Tramp* createMoveHook = nullptr;
 
+bool CreateMove::sendPacket = true;
+QAngle CreateMove::lastViewAngles(0, 0, 0);
 void Hooks::CreateMove(f32 frameTime, UserCmd* cmd, i32 active)
 {
 	createMoveHook->GetOriginalFunction<ClientDLLFuncs::CreateMoveFn>()(frameTime, cmd, active);
@@ -13,9 +15,10 @@ void Hooks::CreateMove(f32 frameTime, UserCmd* cmd, i32 active)
 	if (!cmd)
 		return;
 
-
-
 	AntiAim::CreateMove(cmd);
+
+	if (CreateMove::sendPacket)
+		CreateMove::lastViewAngles = cmd->viewAngles;
 }
 
 void CreateMove::HookCreateMove()

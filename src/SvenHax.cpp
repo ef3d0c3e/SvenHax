@@ -46,6 +46,8 @@ void MainThread()
 		Interface::FindClientDLLFuncs();
 		Interface::FindEngineFuncs();
 
+		Interface::HookVMs();
+
 		ClientDLL::HookRedraw();
 		SDL2::HookSwapWindow();
 		SDL2::HookPollEvent();

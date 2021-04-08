@@ -6,7 +6,7 @@
 #include "Defs.hpp"
 
 typedef Vector<f32, 3> QAngle;
-MAKE_CENUM_Q(QAngleType, u8, // TODO Check if this is the correct order
+MAKE_CENUMV_Q(QAngleType, u8, // TODO Check if this is the correct order
 	PITCH, 0,
 	YAW, 1,
 	ROLL, 2,

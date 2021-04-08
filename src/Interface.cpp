@@ -1,4 +1,5 @@
 #include "Interface.hpp"
+#include "Hooks/Hooks.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -284,4 +285,8 @@ void Interface::FindEngineFuncs()
 {
 	gEngineFuncs = new EngineFuncs;
 	std::memcpy(gEngineFuncs, reinterpret_cast<void*>(symbols["svencoop/cl_dlls/client.so"s]["gEngfuncs"s]), sizeof(EngineFuncs));
+}
+
+void Interface::HookVMs()
+{
 }

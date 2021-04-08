@@ -2,6 +2,7 @@
 #define SDK_CBASEUI_HPP
 
 #include "IBaseInterface.hpp"
+#include "../Engine/Engine.hpp"
 
 class CBaseUI : public IBaseInterface
 {
@@ -9,7 +10,7 @@ public:
 	virtual ~CBaseUI() = 0;
 
 	virtual void Initialize(CreateInterfaceFn *factories, int count) = 0;
-	virtual void Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion) = 0;
+	virtual void Start(EngineFuncs *engineFuncs, int interfaceVersion) = 0;
 	virtual void Shutdown() = 0;
 
 	virtual int Key_Event(int down, int keynum, const char *pszCurrentBinding) = 0;

@@ -15,6 +15,21 @@ float Math::Deg2Rad(float deg)
 	return deg / 180.f * M_PI;
 }
 
+void Math::ClampAngles(QAngle& angle)
+{
+	if (angle[1] > 180.0f)
+		angle[1] = 180.0f;
+	else if (angle[1] < -180.0f)
+		angle[1] = -180.0f;
+
+	if (angle[0] > 89.0f)
+		angle[0] = 89.0f;
+	else if (angle[0] < -89.0f)
+		angle[0] = -89.0f;
+
+	angle[2] = 0;
+}
+
 void Math::NormalizeAngles(QAngle& angle)
 {
 	while (angle[0] > 89.0f)

@@ -42,6 +42,8 @@ namespace Interface
 
 	void FindClientDLLFuncs();
 	void FindEngineFuncs();
+
+	void HookVMs();
 }
 
 #endif // INTERFACE_HPP
