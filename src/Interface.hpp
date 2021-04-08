@@ -5,6 +5,8 @@
 #include "Util/VMT.hpp"
 #include "SDK/SDK.hpp"
 #include "Util/Symbol.hpp"
+#include "Engine/ClientDLL.hpp"
+#include "Engine/Engine.hpp"
 
 extern CBaseFileSystem* fileSystem;
 extern CDedicatedServerAPI* dedicatedServer;
@@ -32,9 +34,6 @@ extern CVGuiSystemModuleLoader* moduleLoader;
 extern CServerBrowser* serverBrowser;
 extern CDefaultCvar* cvar;
 
-typedef i32 (*GetLocalPlayerFn)(void);
-extern GetLocalPlayerFn GetLocalPlayer;
-
 namespace Interface
 {
 	void FindSymbols();
@@ -42,7 +41,7 @@ namespace Interface
 	void DumpInterfaces();
 
 	void FindClientDLLFuncs();
-	void FindFunctions();
+	void FindEngineFuncs();
 }
 
 #endif // INTERFACE_HPP

@@ -11,7 +11,7 @@ void Child(const char* label, float height)
 	ImGui::PopStyleVar();
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, 0x00000000);
 	ImGui::BeginChild(label, ImVec2(w-Settings::Style::child_padding, h-Settings::Style::child_padding), true, ImGuiWindowFlags_NoScrollbar);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 16));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 8));
 }
 
 void EndChild()

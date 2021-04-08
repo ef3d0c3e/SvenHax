@@ -7,12 +7,15 @@ Library::Library(const std::string& name, const std::deque<E::Segment>& segs, co
 	if (entries.empty())
 		return;
 
-	std::cout << "sz: " << segs.size() << " -- " << entries.size() << "\n";
 	if (segs.size() < entries.size())
 		throw Exception("Library::Library() Failed, segs.size() < entries.size() in '{}'", name);
 
 	path = entries.front().path;
 	this->name = name;
+
+	if (name == "svencoop/cl_dlls/client.so"s)
+	{
+	}
 
 	address = entries.front().address;
 	size = entries.back().address - address + entries.back().size; // Rough size

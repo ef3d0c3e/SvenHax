@@ -7,6 +7,7 @@
 #include <fmt/format.h>
 
 #include "Engine/ClientDLL.hpp"
+#include "Engine/Engine.hpp"
 
 #include "Util/Maps.hpp"
 #include "Util/VMT.hpp"
@@ -24,7 +25,12 @@ inline void Message(const String& format, const auto&... args)
 	std::cout << "\033[0m\n";
 }
 
-static bool failed = false;;
+static bool failed = false;
+
+void myInit()
+{
+
+}
 
 void MainThread()
 {
@@ -38,8 +44,9 @@ void MainThread()
 		Interface::FindInterfaces();
 
 		Interface::FindClientDLLFuncs();
-		Interface::FindFunctions();
+		Interface::FindEngineFuncs();
 
+		ClientDLL::HookRedraw();
 		SDL2::HookSwapWindow();
 		SDL2::HookPollEvent();
 		CreateMove::HookCreateMove();
@@ -70,6 +77,7 @@ void __attribute__((destructor)) Shutdown()
 
 	if (!failed)
 	{
+		ClientDLL::UnhookRedraw();
 		SDL2::UnhookWindow();
 		SDL2::UnhookPollEvent();
 		CreateMove::UnhookCreateMove();

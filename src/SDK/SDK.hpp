@@ -27,6 +27,8 @@
 #include "CServerBrowser.hpp"
 #include "CDefaultCvar.hpp"
 
+#include "CBasePlayer.hpp"
+
 #include "VGuiVertex.hpp"
 #include "InputEvent.hpp"
 #include "KeyCode.hpp"

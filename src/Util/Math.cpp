@@ -54,6 +54,6 @@ void Math::CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, float fOldFor
 
 	deltaView = 360.0f - deltaView;
 
-	cmd->forwardmove = cos(Deg2Rad(deltaView)) * fOldForward + cos(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
-	cmd->sidemove = sin(Deg2Rad(deltaView)) * fOldForward + sin(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
+	cmd->forwardMove = cos(Deg2Rad(deltaView)) * fOldForward + cos(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
+	cmd->sideMove = sin(Deg2Rad(deltaView)) * fOldForward + sin(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
 }

@@ -8,6 +8,7 @@ namespace Settings
 {
 namespace Style
 {
+	// Window
 	static float child_padding = 10;
 	static ImU32 window_bg = 0xF0202020;
 	static ImU32 window_accent = 0xFFF02020;
@@ -21,6 +22,13 @@ namespace Style
 	static float tablist_current_standout = 8.f;
 	static ImU32 tablist_shadow = 0x40000000;
 	static float tablist_shadow_scale = 0.01f;
+
+	// Tooltip
+	static ImVec2 tooltip_padding(6.f, 6.f);
+	static float tooltip_rounding = 4.f;
+	static float tooltip_border = 0.f;
+	static ImU32 tooltip_color[3] = { 0xFFCACACA, 0xD0D0D0D0, 0xAA1D1D1D }; // text, border, background
+
 
 
 	// Buttons
@@ -50,6 +58,14 @@ namespace Style
 	static ImU32 textinput_bg = 0xFFD0D0D0;
 	static ImU32 textinput_text = 0xFF202020;
 
+	// Combo
+	static ImU32 arrow_foreground[3] = {0xFF707070, 0xFF707070, 0xFF707070}; // normal, hovered, open
+	static ImU32 arrow_background[3] = {0xFFD0D0D0, 0xFFC0C0C0, 0xFFD0D0D0}; // normal, hovered, open
+	static ImU32 combo_text = 0xFF202020;
+	static ImU32 combo_popup[5] = {0xFF202020, 0xFFC0C0C0, 0xFFA0A0A0, 0xFFB0B0B0, 0xFFB0B0B0}; // foreground, background, current, hovered, selected
+	static ImU32 combo_background[3] = {0xFFD0D0D0, 0xFFC0C0C0, 0xFFD0D0D0}; // normal, hovered, open
+	static float combo_text_padding = 6.f;
+	static float combo_vertical_padding = 4.f;
 }
 }
 

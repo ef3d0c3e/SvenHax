@@ -26,6 +26,12 @@ namespace KeyCodeState
 	extern KeyCode* keyOutput;
 }
 
+namespace ClientDLL
+{
+	void HookRedraw();
+	void UnhookRedraw();
+}
+
 namespace SDL2
 {
 	extern int windowWidth;

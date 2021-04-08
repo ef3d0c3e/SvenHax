@@ -123,7 +123,6 @@ static void SwapWindow(SDL_Window* window)
 		config.OversampleV = 4;
 		config.PixelSnapH = true;
 		config.SizePixels = 40;
-		//UI::plex = io.Fonts->AddFontFromMemoryCompressedBase85TTF(plex_compressed_data_base85, 20.f, &config);
 		UI::plex = io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(resIBMPlexSansBoldData), resIBMPlexSansBoldSize, 20.f, &config);
 		UI::plex_mono = io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(resIBMPlexMonoTextData), resIBMPlexMonoTextSize, 20.f, &config);
 		UI::title_font = io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(resMinecraftiaRegularData), resMinecraftiaRegularSize, 40.f, &config);
@@ -131,7 +130,7 @@ static void SwapWindow(SDL_Window* window)
 		
 		// Colors
 		ImVec4* colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_Text]                  = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+		colors[ImGuiCol_Text]                  = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
 		colors[ImGuiCol_TextDisabled]          = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
 		colors[ImGuiCol_WindowBg]              = ImVec4(0.00f, 0.00f, 0.00f, 0.94f);
 		colors[ImGuiCol_ChildBg]               = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);

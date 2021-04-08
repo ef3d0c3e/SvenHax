@@ -1,9 +1,12 @@
 #include "MainWindow.hpp"
 #include "Tab.hpp"
+#include "../Engine/ClientDLL.hpp"
 
 static void general_1()
 {
 	Child("##CONTENT1", 100);
+
+	ImGui::Text("Third person: %d", (int)gClientDllFuncs->IsThirdPerson());
 
 	ImGui::Text("General1");
 	static bool v = false;
@@ -34,7 +37,7 @@ static void general_2()
 
 	ImGui::Text("General3");
 	static float f = 0.5f;
-	UI::SliderFloat("", &f, -180, +180, "%1.f°");
+	UI::SliderFloat("", &f, 0.f, -180, +180, "%1.f°");
 
 	static char buf[64];
 	UI::InputText("in", buf, IM_ARRAYSIZE(buf));

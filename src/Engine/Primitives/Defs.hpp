@@ -14,6 +14,9 @@ typedef std::int32_t i32;
 typedef std::int64_t i64;
 typedef float f32;
 typedef double f64;
+
 typedef i32 QBool;
+typedef i32 HSprite;
+typedef u32 StringT;
 
 #endif // ENGINE_PRIMITIVES_DEFS_HPP

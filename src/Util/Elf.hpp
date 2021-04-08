@@ -323,9 +323,9 @@ public:
 	{
 		Ehdr* ehdr = reinterpret_cast<Ehdr*>(library);
 		Phdr* phdr = reinterpret_cast<Phdr*>(library + ehdr->e_phoff);
-		Half num = ehdr->e_shnum;
+		Half phnum = ehdr->e_phnum;
 
-		for (Half i = 0; i < num; ++i)
+		for (Half i = 0; i < phnum; ++i)
 		{
 			Segment s
 			{
@@ -437,16 +437,17 @@ public:
 	{
 		const std::uintptr_t addr = module.front().address + symbol.value - module.front().offset;
 
-		auto m = module.cbegin();
 		auto s = segs.cbegin();
-		for (; m != module.cend(); ++m, ++s)
-		for (const auto& m : module)
+		for (auto m = module.cbegin(); m != module.cend(); ++m)
 		{
-			if (m.address > addr - s->align)
-				return m.address + symbol.value - m.offset - s->align;
+			if (!(m->perm & Maps::Permissions::READ))
+				continue;
+
+			if (m->address > addr - s->align)
+				return m->address + symbol.value - m->offset - s->align;
 		}
 
-		return module.back().address + symbol.value - module.back().offset - segs.back().align;
+		return module.back().address + symbol.value - module.back().offset - s->align;
 	}
 };
 

@@ -2,6 +2,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "../ImGui/imgui.cpp"
 #include "../ImGui/imgui_internal.h"
+#include "UI.hpp"
 #include <GL/gl.h>
 
 // {{{ Misc
@@ -20,6 +21,98 @@ void UI::Shadow(const ImVec2& p_min, const ImVec2& p_max, const ImU32 color[4])
 	ImGuiWindow* window = g.CurrentWindow;
 
 	window->DrawList->AddRectFilledMultiColor(p_min, p_max, color[0], color[1], color[2], color[3]);
+}
+
+void UI::RenderArrow(const ImVec2& p_min, ImGuiDir dir, float scale, const ImU32 color)
+{
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+
+	float sz = g.FontSize * 0.8f * scale;
+	ImVec2 pos = p_min;
+	float thickness = ImMax(sz / 5.0f, 1.0f);
+	sz -= thickness*0.5f;
+	pos += ImVec2(thickness*0.25f, thickness*0.25f);
+	
+	const float dist = sz / 2.0f;
+	float bx, by;
+	switch (dir)
+	{
+		case ImGuiDir_Up:
+			bx = pos.x + dist;
+			by = pos.y + dist * 0.66f;
+			window->DrawList->PathLineTo(ImVec2(bx - dist, by + dist));
+			window->DrawList->PathLineTo(ImVec2(bx, by));
+			window->DrawList->PathLineTo(ImVec2(bx + dist, by + dist));
+			break;
+		case ImGuiDir_Down:
+			bx = pos.x + dist;
+			by = pos.y + sz - dist * .33f;
+			window->DrawList->PathLineTo(ImVec2(bx - dist, by - dist));
+			window->DrawList->PathLineTo(ImVec2(bx, by));
+			window->DrawList->PathLineTo(ImVec2(bx + dist, by - dist));
+			break;
+		case ImGuiDir_Left:
+			bx = pos.x + dist * .66f;
+			by = pos.y + sz - dist * .66f;
+			window->DrawList->PathLineTo(ImVec2(bx + dist, by + dist));
+			window->DrawList->PathLineTo(ImVec2(bx, by));
+			window->DrawList->PathLineTo(ImVec2(bx + dist, by - dist));
+			break;
+		case ImGuiDir_Right:
+			bx = pos.x + dist * 1.33f;
+			by = pos.y + sz - dist * .66f;
+			window->DrawList->PathLineTo(ImVec2(bx - dist, by + dist));
+			window->DrawList->PathLineTo(ImVec2(bx, by));
+			window->DrawList->PathLineTo(ImVec2(bx - dist, by - dist));
+			break;
+
+	}
+	window->DrawList->PathStroke(color, false, thickness);
+}
+
+void Tooltip(const char* label)
+{
+	ImGuiContext& g = *GImGui;
+	char window_name[16];
+	ImFormatString(window_name, IM_ARRAYSIZE(window_name), "##Tooltip_%02d", g.TooltipOverrideCount);
+	if (ImGuiWindow* window = ImGui::FindWindowByName(window_name))
+		if (window->Active)
+		{
+			// Hide previous tooltip from being displayed. We can't easily "reset" the content of a window so we create a new one.
+			window->HiddenFrames = 1;
+			ImFormatString(window_name, IM_ARRAYSIZE(window_name), "##Tooltip_%02d", ++g.TooltipOverrideCount);
+		}
+	ImGuiWindowFlags flags = ImGuiWindowFlags_Tooltip|ImGuiWindowFlags_NoInputs|ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoNav;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, Settings::Style::tooltip_border);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, Settings::Style::tooltip_padding);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, Settings::Style::tooltip_rounding);
+	ImGui::PushStyleColor(ImGuiCol_Text, Settings::Style::tooltip_color[0]);
+	ImGui::PushStyleColor(ImGuiCol_Border, Settings::Style::tooltip_color[1]);
+	ImGui::PushStyleColor(ImGuiCol_PopupBg, Settings::Style::tooltip_color[2]);
+	ImGui::PushFont(UI::plex_mono);
+	ImGui::Begin(window_name, NULL, flags);
+
+	ImGui::Text(label);
+
+	IM_ASSERT(ImGui::GetCurrentWindowRead()->Flags & ImGuiWindowFlags_Tooltip);   // Mismatched BeginTooltip()/EndTooltip() calls
+	ImGui::End();
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+}
+
+void UI::Desc(const char *label)
+{
+	if (!ImGui::IsItemHovered())
+		return;
+
+	Tooltip(label);
 }
 // }}}
 
@@ -184,7 +277,7 @@ bool UI::TabList(const char* label, u32 tab, u32 cur, u32 max, ImRect& bb_out, c
 
 // {{{ Sliders
 template <typename TYPE, typename SIGNEDTYPE, typename FLOATTYPE>
-static bool SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_type, TYPE* v, const TYPE v_min, const TYPE v_max, const char* format, float power, ImGuiSliderFlags flags)
+static bool SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_type, TYPE* v, const TYPE v_origin, const TYPE v_min, const TYPE v_max, const char* format, float power, ImGuiSliderFlags flags)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = g.CurrentWindow;
@@ -354,9 +447,33 @@ static bool SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_typ
 		rect_bb.Max.y -= 2 * shrink_amount;
 		grab_bb.Max.y -= 2 * shrink_amount;
 	}
-	window->DrawList->AddRectFilled(rect_bb.Min, ImVec2(grab_bb.Min.x + (grab_bb.Max.x - grab_bb.Min.x) * 0.65f, rect_bb.Max.y), Settings::Style::slider_filled, style.FrameRounding, ImDrawCornerFlags_Left);
-	window->DrawList->AddRectFilled(ImVec2(grab_bb.Max.x - (grab_bb.Max.x - grab_bb.Min.x) * 0.35f, rect_bb.Min.y), rect_bb.Max, Settings::Style::slider_empty, style.FrameRounding, ImDrawCornerFlags_Right);
+	if (v_origin == v_min)
+	{
+		window->DrawList->AddRectFilled(rect_bb.Min, ImVec2(grab_bb.Min.x + (grab_bb.Max.x - grab_bb.Min.x) * 0.65f, rect_bb.Max.y), Settings::Style::slider_filled, style.FrameRounding, ImDrawCornerFlags_Left);
+		window->DrawList->AddRectFilled(ImVec2(grab_bb.Max.x - (grab_bb.Max.x - grab_bb.Min.x) * 0.35f, rect_bb.Min.y), rect_bb.Max, Settings::Style::slider_empty, style.FrameRounding, ImDrawCornerFlags_Right);
+	}
+	else if (v_origin == v_max)
+	{
+		window->DrawList->AddRectFilled(rect_bb.Min, ImVec2(grab_bb.Min.x + (grab_bb.Max.x - grab_bb.Min.x) * 0.65f, rect_bb.Max.y), Settings::Style::slider_empty, style.FrameRounding, ImDrawCornerFlags_Left);
+		window->DrawList->AddRectFilled(ImVec2(grab_bb.Max.x - (grab_bb.Max.x - grab_bb.Min.x) * 0.35f, rect_bb.Min.y), rect_bb.Max, Settings::Style::slider_filled, style.FrameRounding, ImDrawCornerFlags_Right);
+	}
+	else
+	{
+		window->DrawList->AddRectFilled(rect_bb.Min, rect_bb.Max, Settings::Style::slider_empty, style.FrameRounding, ImDrawCornerFlags_Left);
 
+		float pos_t = SliderBehaviorCalcRatioFromValue<TYPE, FLOATTYPE>(data_type, v_origin, v_min, v_max, power, linear_zero_pos);
+		if (!is_horizontal) //TODO
+			pos_t = 1.0f - pos_t;
+		const float origin_pos = ImLerp(slider_usable_pos_min, slider_usable_pos_max, pos_t);
+
+		ImRect origin_bb;
+		if (*v < v_origin) // m---v=====O----M
+			origin_bb = ImRect(grab_pos, rect_bb.Min.y, origin_pos, rect_bb.Max.y);
+		else // m---O====v---M
+			origin_bb = ImRect(origin_pos, rect_bb.Min.y, grab_pos, rect_bb.Max.y);
+
+		window->DrawList->AddRectFilled(origin_bb.Min, origin_bb.Max, Settings::Style::slider_filled, style.FrameRounding);
+	}
 	window->DrawList->AddCircleFilled((grab_bb.Min + grab_bb.Max) * .5, Settings::Style::grab_radius, Settings::Style::slider_grab);
 
 	// Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
@@ -367,7 +484,7 @@ static bool SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_typ
 	return value_changed;
 }
 
-static bool SliderBehavior(const ImRect& frame_bb, ImGuiID id, ImGuiDataType data_type, void* v, const void* v_min, const void* v_max, const char* format, float power, ImGuiSliderFlags flags = 0)
+static bool SliderBehavior(const ImRect& frame_bb, ImGuiID id, ImGuiDataType data_type, void* v, const void* v_origin, const void* v_min, const void* v_max, const char* format, float power, ImGuiSliderFlags flags = 0)
 {
 	// Draw frame
 	ImGuiContext& g = *GImGui;
@@ -377,22 +494,22 @@ static bool SliderBehavior(const ImRect& frame_bb, ImGuiID id, ImGuiDataType dat
 	{
 		case ImGuiDataType_S32:
 			IM_ASSERT(*(const ImS32*)v_min >= IM_S32_MIN / 2 && *(const ImS32*)v_max <= IM_S32_MAX / 2);
-			return SliderBehaviorT<ImS32, ImS32, float>(frame_bb, id, data_type, (ImS32*)v, *(const ImS32*)v_min, *(const ImS32*)v_max, format, power, flags);
+			return SliderBehaviorT<ImS32, ImS32, float>(frame_bb, id, data_type, (ImS32*)v, *(const ImS32*)v_origin, *(const ImS32*)v_min, *(const ImS32*)v_max, format, power, flags);
 		case ImGuiDataType_U32:
 			IM_ASSERT(*(const ImU32*)v_min <= IM_U32_MAX / 2);
-			return SliderBehaviorT<ImU32, ImS32, float>(frame_bb, id, data_type, (ImU32*)v, *(const ImU32*)v_min, *(const ImU32*)v_max, format, power, flags);
+			return SliderBehaviorT<ImU32, ImS32, float>(frame_bb, id, data_type, (ImU32*)v, *(const ImU32*)v_origin, *(const ImU32*)v_min, *(const ImU32*)v_max, format, power, flags);
 		case ImGuiDataType_S64:
 			IM_ASSERT(*(const ImS64*)v_min >= IM_S64_MIN / 2 && *(const ImS64*)v_max <= IM_S64_MAX / 2);
-			return SliderBehaviorT<ImS64, ImS64, double>(frame_bb, id, data_type, (ImS64*)v, *(const ImS64*)v_min, *(const ImS64*)v_max, format, power, flags);
+			return SliderBehaviorT<ImS64, ImS64, double>(frame_bb, id, data_type, (ImS64*)v,*(const ImS64*)v_origin, *(const ImS64*)v_min, *(const ImS64*)v_max, format, power, flags);
 		case ImGuiDataType_U64:
 			IM_ASSERT(*(const ImU64*)v_min <= IM_U64_MAX / 2);
-			return SliderBehaviorT<ImU64, ImS64, double>(frame_bb, id, data_type, (ImU64*)v, *(const ImU64*)v_min, *(const ImU64*)v_max, format, power, flags);
+			return SliderBehaviorT<ImU64, ImS64, double>(frame_bb, id, data_type, (ImU64*)v, *(const ImU64*)v_origin, *(const ImU64*)v_min, *(const ImU64*)v_max, format, power, flags);
 		case ImGuiDataType_Float:
 			IM_ASSERT(*(const float*)v_min >= -FLT_MAX / 2.0f && *(const float*)v_max <= FLT_MAX / 2.0f);
-			return SliderBehaviorT<float, float, float>(frame_bb, id, data_type, (float*)v, *(const float*)v_min, *(const float*)v_max, format, power, flags);
+			return SliderBehaviorT<float, float, float>(frame_bb, id, data_type, (float*)v, *(const float*)v_origin, *(const float*)v_min, *(const float*)v_max, format, power, flags);
 		case ImGuiDataType_Double:
 			IM_ASSERT(*(const double*)v_min >= -DBL_MAX / 2.0f && *(const double*)v_max <= DBL_MAX / 2.0f);
-			return SliderBehaviorT<double, double, double>(frame_bb, id, data_type, (double*)v, *(const double*)v_min, *(const double*)v_max, format, power, flags);
+			return SliderBehaviorT<double, double, double>(frame_bb, id, data_type, (double*)v, *(const double*)v_origin, *(const double*)v_min, *(const double*)v_max, format, power, flags);
 		case ImGuiDataType_COUNT:
 			break;
 	}
@@ -430,7 +547,7 @@ bool InputScalarAsWidgetReplacement(const ImRect& bb, ImGuiID id, const char* la
     return false;
 }
 
-static bool SliderScalar(const char* label, ImGuiDataType data_type, void* v, const void* v_min, const void* v_max, const char* format = NULL, float power = 1.f)
+static bool SliderScalar(const char* label, ImGuiDataType data_type, void* v, void* v_origin, const void* v_min, const void* v_max, const char* format = NULL, float power = 1.f)
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 	if (window->SkipItems)
@@ -481,7 +598,7 @@ static bool SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
 
 	// Actual slider behavior + render grab
 	ImGui::ItemSize(total_bb, style.FramePadding.y);
-	const bool value_changed = SliderBehavior(frame_bb, id, data_type, v, v_min, v_max, format, power);
+	const bool value_changed = SliderBehavior(frame_bb, id, data_type, v, v_origin, v_min, v_max, format, power);
 	if (value_changed)
 		ImGui::MarkItemValueChanged(id);
 
@@ -491,9 +608,9 @@ static bool SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
 	return value_changed;
 }
 
-bool UI::SliderFloat(const char* label, float* v, float v_min, float v_max, const char* display_format, float power)
+bool UI::SliderFloat(const char* label, float* v, float v_origin, float v_min, float v_max, const char* display_format, float power)
 {
-	return SliderScalar(label, ImGuiDataType_Float, v, &v_min, &v_max, display_format, power);
+	return SliderScalar(label, ImGuiDataType_Float, v, &v_origin, &v_min, &v_max, display_format, power);
 }
 // }}}
 
@@ -1215,5 +1332,260 @@ bool UI::InputText(const char* label, char* buf, size_t buf_size, ImVec2 size_ar
 		return enter_pressed;
 	else
 		return value_changed;
+}
+// }}}
+
+// {{{ Combo
+bool UI::BeginCombo(const std::string& label, const std::string& preview, const char* tooltip, ImGuiComboFlags flags)
+{
+	// Always consume the SetNextWindowSizeConstraint() call in our early return paths
+	ImGuiContext& g = *GImGui;
+	ImGuiCond backup_next_window_size_constraint = g.NextWindowData.SizeConstraintCond;
+	g.NextWindowData.SizeConstraintCond = 0;
+
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	IM_ASSERT((flags & (ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_NoPreview)) != (ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_NoPreview)); // Can't use both flags together
+
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label.c_str());
+
+	const float arrow_size = (flags & ImGuiComboFlags_NoArrowButton) ? 0.0f : ImGui::GetFrameHeight();
+	const ImVec2 label_size = ImGui::CalcTextSize(label.c_str(), NULL, true);
+
+	const float w = (flags & ImGuiComboFlags_NoPreview) ? arrow_size : (label_size.x == 0) ? ImGui::GetContentRegionAvail().x : ImGui::CalcItemWidth();
+
+	const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
+	const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+	ImGui::ItemSize(total_bb, style.FramePadding.y);
+	if (!ImGui::ItemAdd(total_bb, id, &frame_bb))
+		return false;
+
+	bool hovered, held;
+	bool pressed = ImGui::ButtonBehavior(frame_bb, id, &hovered, &held);
+	bool popup_open = ImGui::IsPopupOpen(id);
+
+	if (tooltip != NULL && hovered && !popup_open)
+		Tooltip(tooltip);
+
+	const ImRect value_bb(frame_bb.Min, frame_bb.Max - ImVec2(arrow_size, 0.0f));
+	const ImU32 frame_col = popup_open ? Settings::Style::combo_background[2] :
+						hovered ? Settings::Style::combo_background[1] : Settings::Style::combo_background[0];
+	ImGui::RenderNavHighlight(frame_bb, id);
+	if (!(flags & ImGuiComboFlags_NoPreview))
+		window->DrawList->AddRectFilled(frame_bb.Min, ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Max.y), frame_col, style.FrameRounding,
+				popup_open ? ImDrawCornerFlags_TopLeft : ImDrawCornerFlags_Left);
+
+	if (!(flags & ImGuiComboFlags_NoArrowButton))
+	{
+		window->DrawList->AddRectFilled(
+				ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Min.y),
+				frame_bb.Max,
+				ImGui::GetColorU32(
+					popup_open ? Settings::Style::arrow_background[2] :
+						hovered ? Settings::Style::arrow_background[1] : Settings::Style::arrow_background[0]),
+					style.FrameRounding,
+					(w <= arrow_size) ? ImDrawCornerFlags_All : popup_open ? ImDrawCornerFlags_TopRight : ImDrawCornerFlags_Right
+			);
+		UI::RenderArrow(
+				ImVec2(frame_bb.Max.x - arrow_size + style.FramePadding.y, frame_bb.Min.y + style.FramePadding.y),
+				popup_open ? ImGuiDir_Down : ImGuiDir_Left,
+				1.f,
+				popup_open ? Settings::Style::arrow_foreground[2] :
+						hovered ? Settings::Style::arrow_foreground[1] : Settings::Style::arrow_foreground[0]
+			);
+	}
+	ImGui::RenderFrameBorder(frame_bb.Min, frame_bb.Max, style.FrameRounding);
+	if (!(flags & ImGuiComboFlags_NoPreview))
+	{
+		ImGui::PushStyleColor(ImGuiCol_Text, Settings::Style::combo_text);
+		ImGui::RenderTextClipped(frame_bb.Min + style.FramePadding, value_bb.Max, preview.c_str(), NULL, NULL, ImVec2(0.0f, 0.0f));
+		ImGui::PopStyleColor();
+	}
+	if (label_size.x > 0)
+		ImGui::RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label.c_str());
+
+	if ((pressed || g.NavActivateId == id) && !popup_open)
+	{
+		if (window->DC.NavLayerCurrent == 0)
+			window->NavLastIds[0] = id;
+		ImGui::OpenPopupEx(id);
+		popup_open = true;
+	}
+
+	if (!popup_open)
+		return false;
+
+	if (backup_next_window_size_constraint)
+	{
+		g.NextWindowData.SizeConstraintCond = backup_next_window_size_constraint;
+		g.NextWindowData.SizeConstraintRect.Min.x = ImMax(g.NextWindowData.SizeConstraintRect.Min.x, w);
+	}
+	else
+	{
+		if ((flags & ImGuiComboFlags_HeightMask_) == 0)
+			flags |= ImGuiComboFlags_HeightRegular;
+		IM_ASSERT(ImIsPowerOfTwo(flags & ImGuiComboFlags_HeightMask_)); // Only one
+		int popup_max_height_in_items = -1;
+		if (flags & ImGuiComboFlags_HeightRegular)
+			popup_max_height_in_items = 8;
+		else if (flags & ImGuiComboFlags_HeightSmall)
+			popup_max_height_in_items = 4;
+		else if (flags & ImGuiComboFlags_HeightLarge)
+			popup_max_height_in_items = 20;
+		ImGui::SetNextWindowSizeConstraints(ImVec2(w, 0.0f), ImVec2(FLT_MAX, CalcMaxPopupHeightFromItemCount(popup_max_height_in_items)));
+	}
+
+	char name[16];
+	ImFormatString(name, IM_ARRAYSIZE(name), "##Combo_%02d", g.CurrentPopupStack.Size); // Recycle windows based on depth
+
+	// Peak into expected window size so we can position it
+	if (ImGuiWindow* popup_window = ImGui::FindWindowByName(name))
+		if (popup_window->WasActive)
+		{
+			ImVec2 size_contents = CalcSizeContents(popup_window);
+			ImVec2 size_expected = CalcSizeAfterConstraint(popup_window, CalcSizeAutoFit(popup_window, size_contents));
+			if (flags & ImGuiComboFlags_PopupAlignLeft)
+				popup_window->AutoPosLastDirection = ImGuiDir_Left;
+			ImRect r_outer = FindAllowedExtentRectForWindow(popup_window);
+			ImVec2 pos = FindBestWindowPosForPopupEx(frame_bb.GetBL(), size_expected, &popup_window->AutoPosLastDirection, r_outer, frame_bb, ImGuiPopupPositionPolicy_ComboBox);
+			ImGui::SetNextWindowPos(pos);
+		}
+
+	// Horizontally align ourselves with the framed text
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Popup | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+	ImGui::PushStyleColor(ImGuiCol_PopupBg, Settings::Style::combo_popup[1]);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, Settings::Style::combo_vertical_padding));
+	bool ret = ImGui::Begin(name, NULL, window_flags);
+	ImGui::PopStyleColor();
+	if (!ret)
+	{
+		ImGui::EndPopup();
+		IM_ASSERT(0); // This should never happen as we tested for IsPopupOpen() above
+		return false;
+	}
+	return true;
+}
+
+void UI::EndCombo()
+{
+	ImGui::PopStyleVar(); // padding
+	ImGui::EndCombo();
+}
+
+bool UI::Selectable(const char* label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size_arg)
+{
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+
+	if ((flags & ImGuiSelectableFlags_SpanAllColumns) && window->DC.ColumnsSet) // FIXME-OPT: Avoid if vertically clipped.
+		ImGui::PopClipRect();
+
+	ImGuiID id = window->GetID(label);
+	ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
+	ImVec2 size(size_arg.x != 0.0f ? size_arg.x : label_size.x, size_arg.y != 0.0f ? size_arg.y : label_size.y);
+	ImVec2 pos = window->DC.CursorPos;
+	pos.y += window->DC.CurrentLineTextBaseOffset;
+	ImRect bb_inner(pos, pos + size);
+	ImGui::ItemSize(bb_inner);
+
+	// Fill horizontal space.
+	ImVec2 window_padding = window->WindowPadding;
+	float max_x = (flags & ImGuiSelectableFlags_SpanAllColumns) ? ImGui::GetWindowContentRegionMax().x : ImGui::GetContentRegionMax().x;
+	float w_draw = ImMax(label_size.x, window->Pos.x + max_x - window_padding.x - window->DC.CursorPos.x);
+	ImVec2 size_draw((size_arg.x != 0 && !(flags & ImGuiSelectableFlags_DrawFillAvailWidth)) ? size_arg.x : w_draw, size_arg.y != 0.0f ? size_arg.y : size.y);
+	ImRect bb(pos, pos + size_draw);
+	if (size_arg.x == 0.0f || (flags & ImGuiSelectableFlags_DrawFillAvailWidth))
+		bb.Max.x += window_padding.x;
+
+	// Selectables are tightly packed together, we extend the box to cover spacing between selectable.
+	float spacing_L = (float)(int)(style.ItemSpacing.x * 0.5f);
+	float spacing_U = (float)(int)(style.ItemSpacing.y * 0.5f);
+	float spacing_R = style.ItemSpacing.x - spacing_L;
+	float spacing_D = style.ItemSpacing.y - spacing_U;
+	bb.Min.x -= spacing_L;
+	bb.Min.y -= spacing_U;
+	bb.Max.x += spacing_R;
+	bb.Max.y += spacing_D;
+	if (!ImGui::ItemAdd(bb, (flags & ImGuiSelectableFlags_Disabled) ? 0 : id))
+	{
+		if ((flags & ImGuiSelectableFlags_SpanAllColumns) && window->DC.ColumnsSet)
+			ImGui::PushColumnClipRect();
+		return false;
+	}
+
+	// We use NoHoldingActiveID on menus so user can click and _hold_ on a menu then drag to browse child entries
+	ImGuiButtonFlags button_flags = 0;
+	if (flags & ImGuiSelectableFlags_NoHoldingActiveID)
+		button_flags |= ImGuiButtonFlags_NoHoldingActiveID;
+	if (flags & ImGuiSelectableFlags_PressedOnClick)
+		button_flags |= ImGuiButtonFlags_PressedOnClick;
+	if (flags & ImGuiSelectableFlags_PressedOnRelease)
+		button_flags |= ImGuiButtonFlags_PressedOnRelease;
+	if (flags & ImGuiSelectableFlags_Disabled)
+		button_flags |= ImGuiButtonFlags_Disabled;
+	if (flags & ImGuiSelectableFlags_AllowDoubleClick)
+		button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick;
+	bool hovered, held;
+	bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, button_flags);
+	if (flags & ImGuiSelectableFlags_Disabled)
+		selected = false;
+
+	// Hovering selectable with mouse updates NavId accordingly so navigation can be resumed with gamepad/keyboard (this doesn't happen on most widgets)
+	if (pressed || hovered)
+		if (!g.NavDisableMouseHover && g.NavWindow == window && g.NavLayer == window->DC.NavLayerCurrent)
+		{
+			g.NavDisableHighlight = true;
+			SetNavID(id, window->DC.NavLayerCurrent);
+		}
+	if (pressed)
+		ImGui::MarkItemValueChanged(id);
+
+	// Render
+	if (hovered || selected)
+	{
+		const ImU32 col = (held && hovered) ? Settings::Style::combo_popup[4] : hovered ? Settings::Style::combo_popup[3] :
+																							  Settings::Style::combo_popup[2];
+		ImGui::RenderFrame(bb.Min, bb.Max, col, false, 0.0f);
+		ImGui::RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
+	}
+
+	if ((flags & ImGuiSelectableFlags_SpanAllColumns) && window->DC.ColumnsSet)
+	{
+		ImGui::PushColumnClipRect();
+		bb.Max.x -= (ImGui::GetContentRegionMax().x - max_x);
+	}
+
+	ImGui::PushStyleColor(ImGuiCol_Text, Settings::Style::combo_text);
+	ImGui::RenderTextClipped(bb_inner.Min+ImVec2(Settings::Style::combo_text_padding, 0), bb.Max-ImVec2(Settings::Style::combo_text_padding, 0), label, NULL, &label_size, ImVec2(0.0f, 0.0f));
+	ImGui::PopStyleColor();
+
+	// Automatically close popups
+	if (pressed && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_DontClosePopups) && !(window->DC.ItemFlags & ImGuiItemFlags_SelectableDontClosePopup))
+		ImGui::CloseCurrentPopup();
+	return pressed;
+}
+
+void UI::SetItemDefaultFocus()
+{
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+	if (!window->Appearing)
+		return;
+	if (g.NavWindow == window->RootWindowForNav && (g.NavInitRequest || g.NavInitResultId != 0) && g.NavLayer == g.NavWindow->DC.NavLayerCurrent)
+	{
+		g.NavInitRequest = false;
+		g.NavInitResultId = g.NavWindow->DC.LastItemId;
+		g.NavInitResultRectRel = ImRect(g.NavWindow->DC.LastItemRect.Min - g.NavWindow->Pos, g.NavWindow->DC.LastItemRect.Max - g.NavWindow->Pos);
+		NavUpdateAnyRequestFlag();
+		if (!ImGui::IsItemVisible())
+			ImGui::SetScrollHere();
+	}
 }
 // }}}

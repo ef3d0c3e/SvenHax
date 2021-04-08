@@ -12,7 +12,7 @@ class Tramp
 	std::uintptr_t m_addr = 0;
 	std::size_t m_len;
 public:
-	Tramp(std::uintptr_t fn, std::uintptr_t hkFn, std::size_t len, std::function<void(std::uintptr_t, std::uintptr_t)> patch)
+	Tramp(std::uintptr_t fn, std::uintptr_t hkFn, std::size_t len, std::function<void(std::uintptr_t, std::uintptr_t)> patch = [](std::uintptr_t, std::uintptr_t){})
 	{
 		m_addr = fn;
 		m_len = len;
@@ -50,7 +50,7 @@ public:
 			throw Exception("Tramp::Tramp() mprotect(gateway) failed to set executable\n");
 	}
 
-	void Release(std::function<void(std::uintptr_t, std::uintptr_t)> patch)
+	void Release(std::function<void(std::uintptr_t, std::uintptr_t)> patch = [](std::uintptr_t, std::uintptr_t){})
 	{
 
 		const auto prot = GetProtectionFlags(m_addr);

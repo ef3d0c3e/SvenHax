@@ -7,7 +7,7 @@
 #include "Primitives/Mouth.hpp"
 #include "Primitives/LatchedVars.hpp"
 
-struct Entity
+struct Entity // cl_entity_s
 {
 	i32 index; // Index into cl_entities ( should match actual slot, but not necessarily )
 
@@ -46,7 +46,7 @@ struct Entity
 	f32 syncbase; // for client-side animations -- used by obsolete alias animation system, remove?
 	i32 visframe; // last frame this entity was found in an active leaf
 	//colorVec cvFloorColor;
-	Vector<i32, 4> cvFloorColor; // ??
+	Color32 cvFloorColor; // ?
 };
 
 #endif // ENGINE_ENTITY_HPP
