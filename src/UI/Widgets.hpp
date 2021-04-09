@@ -5,6 +5,7 @@
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_internal.h"
 #include "Style.hpp"
+#include <vector>
 #include <string>
 
 namespace UI
@@ -12,6 +13,7 @@ namespace UI
 	void Shadow(const ImVec2& p_min, const ImVec2& p_max, const ImU32 color[4]);
 	void RenderArrow(const ImVec2& p_min, ImGuiDir dir, float scale, const ImU32 color);
 	void Desc(const char* label);
+	void Separator();
 
 	bool Button(const char* label, const ImVec2& size_args = ImVec2(0, 0));
 	bool SelectButton(const char* label, bool selected, const ImVec2& size_args = ImVec2(0, 0));
@@ -27,6 +29,11 @@ namespace UI
 	void EndCombo();
 	bool Selectable(const char* label, bool selected = false, ImGuiSelectableFlags flags = 0, const ImVec2& size_arg = ImVec2(0,0));
 	void SetItemDefaultFocus();
+	void CheckboxCombo(const std::vector<std::tuple<const char*, const char*, bool&>>& data, std::string& format); // name, desc, value
+
+	bool ColorButton(const char* desc_id, const ImVec4& col, ImGuiColorEditFlags flags = 0, ImVec2 size = ImVec2(0, 0));
+	bool ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags, const float* ref_col);
+	bool ColorEdit4(const char* label, ImVec4& col, ImGuiColorEditFlags = 0);
 }
 
 #endif // UI_WIDGETS_HPP

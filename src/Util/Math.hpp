@@ -14,6 +14,8 @@ namespace Math
 	void NormalizeAngles(QAngle& angle);
 	void ClampAngles(QAngle& angle);
 	void CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, float fOldForward, float fOldSidemove);
+
+	QAngle AngleForVec(const Vec3& forward);
 }
 
 #endif // UTIL_MATH_HPP

@@ -47,8 +47,12 @@ CVGuiSystemModuleLoader* moduleLoader = nullptr;
 CServerBrowser* serverBrowser = nullptr;
 CDefaultCvar* cvar = nullptr;
 
+CEngine* engine = nullptr;
+CBasePlayer* gPlayerList = nullptr;
+
 ClientDLLFuncs* gClientDllFuncs = nullptr;
 EngineFuncs* gEngineFuncs = nullptr;
+PlayerMove* gPMove = nullptr;
 
 void Interface::FindSymbols()
 {
@@ -285,6 +289,21 @@ void Interface::FindEngineFuncs()
 {
 	gEngineFuncs = new EngineFuncs;
 	std::memcpy(gEngineFuncs, reinterpret_cast<void*>(symbols["svencoop/cl_dlls/client.so"s]["gEngfuncs"s]), sizeof(EngineFuncs));
+}
+
+void Interface::FindCEngine()
+{
+	engine = reinterpret_cast<CEngine*>(symbols["hw.so"s]["g_Engine"s]);
+}
+
+void Interface::FindPlayerList()
+{
+	gPlayerList = reinterpret_cast<CBasePlayer*>(symbols["svencoop/cl_dlls/client.so"s]["player"s]);
+}
+
+void Interface::FindPlayerMove()
+{
+	gPMove = reinterpret_cast<PlayerMove*>(symbols["hw.so"s]["g_clmove"s]);
 }
 
 void Interface::HookVMs()

@@ -67,11 +67,8 @@ void AntiAim::CreateMove(UserCmd* cmd)
 		case Settings::AA::Yaw::ANGEL:
 			angle[YAW] = oldAngle[YAW] + 36000180.0f + Settings::AA::yawOffset;
 			break;
-		case Settings::AA::Yaw::ANGEL_INVERSE:
-			angle[YAW] = 36000180.0f + Settings::AA::yawOffset;
-			break;
 		case Settings::AA::Yaw::ANGEL_SPIN:
-			//angle[YAW] = 36000000.0f + engine->GetCurtu;
+			angle[YAW] = 36000000.0f + engine->GetCurTime()*5000.f;
 			break;
 	}
 	// }}}
@@ -124,7 +121,6 @@ void AntiAim::CreateMove(UserCmd* cmd)
 	}
 	previousAngle = angle;
 	cmd->viewAngles = angle;
-
 
 	Math::CorrectMovement(oldAngle, cmd, oldForward, oldSideMove);
 }

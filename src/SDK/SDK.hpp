@@ -27,6 +27,7 @@
 #include "CServerBrowser.hpp"
 #include "CDefaultCvar.hpp"
 
+#include "CEngine.hpp"
 #include "CBasePlayer.hpp"
 
 #include "VGuiVertex.hpp"

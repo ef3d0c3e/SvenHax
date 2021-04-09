@@ -680,7 +680,7 @@ public:
 	template <typename R>
 	/** @cond */ __vector_inline /** @endcond */
 		R
-		Lenght() const noexcept
+		Length() const noexcept
 	{
 		const T s = abs(Get([](T a, T b) { return abs(a) < abs(b); }));
 
@@ -734,7 +734,7 @@ public:
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		T
-		LenghtSqr() const noexcept
+		LengthSqr() const noexcept
 	{
 		T r = T();
 		vector_foreach_do(r += d[i] * d[i]);

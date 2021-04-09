@@ -22,8 +22,7 @@ MAKE_CENUM_Q(Yaw, u8,
 	SPIN, 3,
 	LISP, 4,
 	ANGEL, 5,
-	ANGEL_INVERSE, 6,
-	ANGEL_SPIN, 7);
+	ANGEL_SPIN, 6);
 extern Yaw yaw;
 extern f32 yawOffset;
 extern f32 yawJitterRange[2];

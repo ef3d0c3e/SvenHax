@@ -46,6 +46,10 @@ void MainThread()
 		Interface::FindClientDLLFuncs();
 		Interface::FindEngineFuncs();
 
+		Interface::FindCEngine();
+		Interface::FindPlayerList();
+		Interface::FindPlayerMove();
+
 		Interface::HookVMs();
 
 		ClientDLL::HookRedraw();
@@ -54,6 +58,7 @@ void MainThread()
 		CreateMove::HookCreateMove();
 		
 		console->DPrintf("SvenHax Successfully Loaded...\n");
+
 	}
 	catch (Exception& e)
 	{

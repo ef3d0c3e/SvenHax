@@ -94,6 +94,9 @@ void UI::MainWindow()
 			case 2:
 				UI::AntiAimTab();
 				break;
+			case 3:
+				UI::MiscTab();
+				break;
 		}
 
 		const ImVec2 windowPos = ImGui::GetWindowPos();

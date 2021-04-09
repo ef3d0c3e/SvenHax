@@ -119,7 +119,6 @@ void GeneralRight()
 		"Spin"s,
 		"Lisp"s,
 		"Angel"s,
-		"Angel (Inverse)"s,
 		"Angel (Spin)"s
 	);
 
@@ -168,7 +167,6 @@ void GeneralRight()
 			UI::Desc("Offset from back yaw");
 			break;
 		case Settings::AA::Yaw::ANGEL:
-		case Settings::AA::Yaw::ANGEL_INVERSE:
 			ImGui::Text("Offset");
 			UI::SliderFloat("##OFFSET", &Settings::AA::yawOffset, 0.f, -180.f, 180.f, "%.f°");
 			UI::Desc("Offset from back yaw");

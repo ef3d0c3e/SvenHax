@@ -4,9 +4,7 @@
 #include "../ImGui/imgui.h"
 #include "../Engine/Primitives/Defs.hpp"
 
-namespace Settings
-{
-namespace Style
+namespace Settings::Style
 {
 	// Window
 	static float child_padding = 10;
@@ -60,13 +58,16 @@ namespace Style
 
 	// Combo
 	static ImU32 arrow_foreground[3] = {0xFF707070, 0xFF707070, 0xFF707070}; // normal, hovered, open
-	static ImU32 arrow_background[3] = {0xFFD0D0D0, 0xFFC0C0C0, 0xFFD0D0D0}; // normal, hovered, open
-	static ImU32 combo_text = 0xFF202020;
-	static ImU32 combo_popup[5] = {0xFF202020, 0xFFC0C0C0, 0xFFA0A0A0, 0xFFB0B0B0, 0xFFB0B0B0}; // foreground, background, current, hovered, selected
-	static ImU32 combo_background[3] = {0xFFD0D0D0, 0xFFC0C0C0, 0xFFD0D0D0}; // normal, hovered, open
+	static ImU32 arrow_background[3] = {0xFFB8B8B8, 0xFFB8B8B8, 0xFFDADADA}; // normal, hovered, open
+	static ImU32 combo_text = 0xFF050505;
+	static ImU32 combo_background[3] = {0xFFB8B8B8, 0xFFB8B8B8, 0xFFDADADA}; // normal, hovered, open
+	static ImU32 combo_popup[5] = {0xFF222222, 0xFF17181A, 0xFF1A1A1A, 0xFF272A2D, 0xFF272A2D}; // border, background, current, hovered, active
 	static float combo_text_padding = 6.f;
 	static float combo_vertical_padding = 4.f;
-}
+
+	// Colors
+	static float color_button_width = 1.80f; // as compared to height
+	static ImU32 color_button_border = 0x50FFFFFF;
 }
 
 #endif // UI_COLORS_HPP

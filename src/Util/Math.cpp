@@ -12,7 +12,8 @@ std::pair<f32, f32> Math::SinCos(f32 t)
 
 float Math::Deg2Rad(float deg)
 {
-	return deg / 180.f * M_PI;
+	static constexpr float DEG2RAD = M_PI / 180.f;
+	return deg * DEG2RAD;
 }
 
 void Math::ClampAngles(QAngle& angle)
@@ -71,4 +72,28 @@ void Math::CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, float fOldFor
 
 	cmd->forwardMove = cos(Deg2Rad(deltaView)) * fOldForward + cos(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
 	cmd->sideMove = sin(Deg2Rad(deltaView)) * fOldForward + sin(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
+}
+
+QAngle AngleForVec(const Vec3& forward)
+{
+	QAngle angles;
+	if (forward[1] == 0.0f && forward[0] == 0.0f)
+	{
+		angles[0] = (forward[2] > 0.0f) ? 270.0f : 90.0f; // Pitch (up/down)
+		angles[1] = 0.0f;  //yaw left/right
+	}
+	else
+	{
+		angles[0] = atan2(-forward[2], sqrt(forward[0]*forward[0]+forward[1]*forward[1]) ) * -180 / M_PI;
+		angles[1] = atan2(forward[1], forward[0]) * 180 / M_PI;
+
+		if (angles[1] > 90)
+			angles[1] -= 180;
+		else if (angles[1] < 90)
+			angles[1] += 180;
+		else if (angles[1] == 90)
+			angles[1] = 0;
+	}
+
+	angles[2] = 0.0f;
 }

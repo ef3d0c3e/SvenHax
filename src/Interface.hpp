@@ -34,6 +34,10 @@ extern CVGuiSystemModuleLoader* moduleLoader;
 extern CServerBrowser* serverBrowser;
 extern CDefaultCvar* cvar;
 
+extern CEngine* engine;
+
+//exterb CBaseEntity* entlist;
+
 namespace Interface
 {
 	void FindSymbols();
@@ -42,6 +46,10 @@ namespace Interface
 
 	void FindClientDLLFuncs();
 	void FindEngineFuncs();
+
+	void FindCEngine();
+	void FindPlayerList();
+	void FindPlayerMove();
 
 	void HookVMs();
 }

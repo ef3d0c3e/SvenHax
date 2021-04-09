@@ -3,32 +3,44 @@
 
 #include "../Engine/Entity.hpp"
 #include "../Engine/Engine.hpp"
+#include "../Util/Util.hpp"
 
 class CBasePlayer
 {
-	i32 m_idx;
-	Entity* m_ent;
 public:
-	CBasePlayer() {}
-
-	void UpdatePlayer(i32 index)
+	virtual void* MyMonsterPointer()
 	{
-		m_idx = index;
-		m_ent = gEngineFuncs->GetEntityByIndex(index);
+		return getvfunc<void*(*)(CBasePlayer*)>(this, 28)(this);
 	}
 
-	Vec3 GetOrigin() const
+	virtual bool IsAlive()
 	{
-		return m_ent->origin;
+		return getvfunc<bool(*)(CBasePlayer*)>(this, 47)(this);
 	}
 
-	QAngle GetAngles() const
+	virtual Vec3 Center()
 	{
-		return m_ent->angles;
+		return getvfunc<Vec3(*)(CBasePlayer*)>(this, 71)(this);
 	}
+
+	virtual Vec3 EyePosition()
+	{
+		return getvfunc<Vec3(*)(CBasePlayer*)>(this, 72)(this);
+	}
+
+	virtual Vec3 EarPosition()
+	{
+		return getvfunc<Vec3(*)(CBasePlayer*)>(this, 73)(this);
+	}
+
+	virtual bool IsConnected()
+	{
+		return getvfunc<bool(*)(CBasePlayer*)>(this, 218)(this);
+	}
+
 };
 
 static constexpr std::size_t MaxPlayers = 32;
-extern CBasePlayer gPlayerList[MaxPlayers];
+extern CBasePlayer* gPlayerList;
 
 #endif // SDK_CBASEPLAYER_HPP

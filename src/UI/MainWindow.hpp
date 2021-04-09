@@ -10,6 +10,7 @@ namespace UI
 
 	void AimTab();
 	void AntiAimTab();
+	void MiscTab();
 }
 
 #endif // UI_MAINWINDOW_HPP
