@@ -1,4 +1,5 @@
 #include "AutoStrafer.hpp"
+#include "../Misc.hpp"
 
 namespace Settings::AutoStrafer
 {
@@ -8,7 +9,8 @@ namespace Settings::AutoStrafer
 	bool sideways = true;
 }
 
-/*
+static constexpr f32 Speed = 300;
+
 static void GroundStrafe(UserCmd* cmd)
 {
 	static bool state = false;
@@ -23,7 +25,7 @@ static void GroundStrafe(UserCmd* cmd)
 		cmd->buttons &= ~IN_DUCK;
 		state = false;
 	}
-}*/
+}
 
 static void RageStrafe(UserCmd* cmd)
 {
@@ -43,15 +45,15 @@ static void RageStrafe(UserCmd* cmd)
 
 	if (!(gPMove->flags & MoveFlags::ONGROUND) && !inMove)
 	{
-		if (leftRight /*|| cmd->mousedx > 1*/)
+		if (leftRight || Misc::mousedx > 1)
 		{
 			viewAngles[YAW] += yaw_change;
-			cmd->sideMove = 250.0f;
+			cmd->sideMove = 400.0f;
 		}
-		else if (!leftRight /*|| cmd->mousedx < 1*/)
+		else if (!leftRight || Misc::mousedx < 1)
 		{
 			viewAngles[YAW] -= yaw_change;
-			cmd->sideMove = -250.0f;
+			cmd->sideMove = -400.0f;
 		}
 
 		leftRight = !leftRight;
@@ -67,13 +69,57 @@ static void RageStrafe(UserCmd* cmd)
 
 }
 
+inline static f32 get_delta(float speed)
+{
+	auto term = (30.0 - (gPMove->moveVars->airAccelerate * gPMove->maxSpeed / 66.0)) / speed;
+
+	if (term < 1.0f && term > -1.0f)
+	{
+		return acos(term);
+	}
+
+	return 0.f;
+}
+
 static void AirStrafe(UserCmd* cmd)
 {
-	if (gPMove->flags & MoveFlags::ONGROUND || cmd->buttons & IN_USE || cmd->buttons & IN_ATTACK || cmd->buttons & IN_ATTACK2)
+	if (gPMove->flags & MoveFlags::ONGROUND)
 		return;
 
+	Vec3 velocity = gPMove->velocity;
+	f32 speed = Vec2(velocity[0], velocity[1]).Length();
+	if (speed < 1.f)
+		return;
+	f32 yawVelocity = Math::Rad2Deg(std::atan2(velocity[1], velocity[0]));
+	f32 velocityDelta = Math::NormalizeYaw(cmd->viewAngles[YAW] - yawVelocity);
+	const f32 maxSpeed = gPMove->clientMaxSpeed;
 
+	if (std::abs(Misc::mousedx) > 1)
+	{
+		cmd->sideMove = (Misc::mousedx > 0) ? -maxSpeed : maxSpeed;
+		return;
+	}
 
+	if (cmd->buttons & IN_BACK)
+		cmd->viewAngles[YAW] -= 180.f;
+	else if (cmd->buttons & IN_MOVELEFT)
+		cmd->viewAngles[YAW] -= 90.f;
+	else if (cmd->buttons & IN_MOVERIGHT)
+		cmd->viewAngles[YAW] += 90.f;
+
+	if (speed < 0.5f || speed == NAN || speed == INFINITY)
+	{
+		cmd->forwardMove = maxSpeed;
+		return;
+	}
+
+	cmd->forwardMove = std::clamp(3500.f / speed, -maxSpeed, maxSpeed);
+
+	if (cmd->forwardMove < -maxSpeed || cmd->forwardMove > maxSpeed)
+		cmd->forwardMove = 0.f;
+
+	cmd->sideMove = (velocityDelta > 0.f) ? -maxSpeed : maxSpeed;
+	cmd->viewAngles[YAW] = Math::NormalizeYaw(cmd->viewAngles[YAW] - velocityDelta);
 }
 
 void AutoStrafer::CreateMove(UserCmd* cmd)
@@ -86,6 +132,10 @@ void AutoStrafer::CreateMove(UserCmd* cmd)
 
 	if (gPMove->moveType == MoveType::FLY || gPMove->moveType == MoveType::NOCLIP)
 		return;
+
+	if (cmd->buttons & IN_USE || cmd->buttons & IN_ATTACK || cmd->buttons & IN_ATTACK2)
+		return;
+
 
 	AirStrafe(cmd);
 	//RageStrafe(cmd);

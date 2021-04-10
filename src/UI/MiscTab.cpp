@@ -21,6 +21,7 @@ void MovementsRight()
 
 	ImGui::Text("Auto strafer");
 	UI::Checkbox("Enabled", &Settings::AutoStrafer::enabled);
+	Export<"autostrafer.enabled">(Settings::AutoStrafer::enabled);
 
 	static std::string format = "";
 	UI::CheckboxCombo({
@@ -28,6 +29,7 @@ void MovementsRight()
 		{"Ground Strafe", "Strafe on ground", Settings::AutoStrafer::ground},
 		{"Sideways", "Goes into the direction chose\nby pressing WASD", Settings::AutoStrafer::sideways},
 	}, format);
+	
 
 	static ImVec4 color;
 	UI::ColorEdit4("Indicator", color, false);

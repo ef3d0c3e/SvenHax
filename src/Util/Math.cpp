@@ -10,10 +10,16 @@ std::pair<f32, f32> Math::SinCos(f32 t)
 	return {sinr, cosr};
 }
 
-float Math::Deg2Rad(float deg)
+f32 Math::Deg2Rad(f32 deg)
 {
-	static constexpr float DEG2RAD = M_PI / 180.f;
+	static constexpr f32 DEG2RAD = M_PI / 180.f;
 	return deg * DEG2RAD;
+}
+
+f32 Math::Rad2Deg(f32 rad)
+{
+	static constexpr f32 RAD2DEG = 180.f / M_PI;
+	return rad * RAD2DEG;
 }
 
 void Math::ClampAngles(QAngle& angle)
@@ -46,12 +52,22 @@ void Math::NormalizeAngles(QAngle& angle)
 		angle[1] += 360.f;
 }
 
-void Math::CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, float fOldForward, float fOldSidemove)
+f32 Math::NormalizeYaw(f32 yaw)
+{
+	while (yaw > 180.f)
+		yaw -= 360.f;
+	while (yaw < -180.f)
+		yaw += 360.f;
+
+	return yaw;
+}
+
+void Math::CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, f32 fOldForward, f32 fOldSidemove)
 {
 	// side/forward move correction
-	float deltaView;
-	float f1;
-	float f2;
+	f32 deltaView;
+	f32 f1;
+	f32 f2;
 
 	if (vOldAngles[1] < 0.f)
 		f1 = 360.0f + vOldAngles[1];
@@ -74,7 +90,7 @@ void Math::CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, float fOldFor
 	cmd->sideMove = sin(Deg2Rad(deltaView)) * fOldForward + sin(Deg2Rad(deltaView + 90.f)) * fOldSidemove;
 }
 
-QAngle AngleForVec(const Vec3& forward)
+QAngle Math::AngleForVec(const Vec3& forward)
 {
 	QAngle angles;
 	if (forward[1] == 0.0f && forward[0] == 0.0f)
@@ -84,8 +100,8 @@ QAngle AngleForVec(const Vec3& forward)
 	}
 	else
 	{
-		angles[0] = atan2(-forward[2], sqrt(forward[0]*forward[0]+forward[1]*forward[1]) ) * -180 / M_PI;
-		angles[1] = atan2(forward[1], forward[0]) * 180 / M_PI;
+		angles[0] = - Rad2Deg(std::atan2(-forward[2], sqrt(forward[0]*forward[0]+forward[1]*forward[1]) ));
+		angles[1] = Rad2Deg(std::atan2(forward[1], forward[0]));
 
 		if (angles[1] > 90)
 			angles[1] -= 180;
@@ -96,4 +112,14 @@ QAngle AngleForVec(const Vec3& forward)
 	}
 
 	angles[2] = 0.0f;
+
+	return angles;
+}
+
+Vec3 Math::VectorAngle(const QAngle& angles)
+{
+	const auto&& [sy, cy] = Math::SinCos(Deg2Rad(angles[YAW]));
+	const auto&& [sp, cp] = Math::SinCos(Deg2Rad(angles[PITCH]));
+
+	return Vec3(cp*cy, cp*sy, -sp);
 }

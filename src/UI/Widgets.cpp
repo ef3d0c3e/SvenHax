@@ -1617,7 +1617,10 @@ void UI::CheckboxCombo(const std::vector<std::tuple<const char*, const char*, bo
 				first = false;
 			format += std::string(std::get<0>(d));
 		}
+		format += " "; // Voodoo
 	};
+	if (format.empty())
+		UpdateFormat();
 
 	if (UI::BeginCombo(""s, format.c_str()))
 	{

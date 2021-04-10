@@ -6,7 +6,6 @@
 #include "../ImGui/examples/libs/gl3w/GL/gl3w.h"
 #include "../ImGui/imgui_internal.h" // for 	ImGui::GetCurrentContext()->Font->DisplayOffset
 #include "../Interface.hpp"
-#include "../Settings.hpp"
 #include "../Shortcuts.hpp"
 #include "../UI/UI.hpp"
 #include "../Util/Hooker.hpp"

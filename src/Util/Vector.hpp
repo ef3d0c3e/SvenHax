@@ -677,23 +677,18 @@ public:
 	/// \return A scalar containing the distance
 	///
 	////////////////////////////////////////////////////////////
-	template <typename R>
+	template <typename R = T>
 	/** @cond */ __vector_inline /** @endcond */
 		R
 		Length() const noexcept
 	{
-		const T s = abs(Get([](T a, T b) { return abs(a) < abs(b); }));
+		T x = T();
+		vector_foreach_do(x += d[i]*d[i])
 
-		if (s == T()) // well ...
-			return T();
-
-		R r = R(), x;
-		vector_foreach_do(
-			(x = static_cast<R>(abs(d[i])) / static_cast<R>(s), // divide by s to avoid
-			 // overflow...
-			 r += x * x));
-
-		return static_cast<R>(s) * sqrt(r);
+		if constexpr (std::is_same_v<T, R>)
+			return std::sqrt(x);
+		else
+			return std::sqrt(static_cast<R>(x));
 	}
 
 	////////////////////////////////////////////////////////////
@@ -740,6 +735,15 @@ public:
 		vector_foreach_do(r += d[i] * d[i]);
 
 		return r;
+	}
+
+	template <class R = T>
+	/** @cond */ __vector_inline /** @endcond */
+		void
+		Normalize() noexcept
+	{
+		const R n = Length<R>();
+		vector_foreach_do(d[i] /= n);
 	}
 
 	////////////////////////////////////////////////////////////

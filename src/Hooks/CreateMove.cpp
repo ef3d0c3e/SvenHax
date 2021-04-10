@@ -1,6 +1,7 @@
 #include "Hooks.hpp"
 #include "../Util/Hooker.hpp"
 
+#include "../Misc.hpp"
 #include "../Hacks/AntiAim.hpp"
 #include "../Hacks/BHop.hpp"
 #include "../Hacks/AutoStrafer.hpp"
@@ -17,6 +18,7 @@ void Hooks::CreateMove(f32 frameTime, UserCmd* cmd, i32 active)
 	if (!cmd)
 		return;
 
+	Misc::CreateMove(cmd);
 	BHop::CreateMove(cmd);
 	AutoStrafer::CreateMove(cmd);
 	AntiAim::CreateMove(cmd);

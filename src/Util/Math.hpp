@@ -10,12 +10,15 @@
 namespace Math
 {
 	std::pair<f32, f32> SinCos(f32 t);
-	float Deg2Rad(float deg);
+	f32 Deg2Rad(f32 deg);
+	f32 Rad2Deg(f32 rad);
 	void NormalizeAngles(QAngle& angle);
+	f32 NormalizeYaw(f32 yaw);
 	void ClampAngles(QAngle& angle);
-	void CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, float fOldForward, float fOldSidemove);
+	void CorrectMovement(const QAngle &vOldAngles, UserCmd* cmd, f32 fOldForward, f32 fOldSidemove);
 
 	QAngle AngleForVec(const Vec3& forward);
+	Vec3 VectorAngle(const QAngle& angles);
 }
 
 #endif // UTIL_MATH_HPP
