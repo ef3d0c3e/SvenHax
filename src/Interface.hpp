@@ -36,8 +36,6 @@ extern CDefaultCvar* cvar;
 
 extern CEngine* engine;
 
-//exterb CBaseEntity* entlist;
-
 namespace Interface
 {
 	void FindSymbols();
@@ -50,6 +48,7 @@ namespace Interface
 	void FindCEngine();
 	void FindPlayerList();
 	void FindPlayerMove();
+	void FindEnts();
 
 	void HookVMs();
 }

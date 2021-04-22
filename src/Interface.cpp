@@ -306,6 +306,12 @@ void Interface::FindPlayerMove()
 	gPMove = reinterpret_cast<PlayerMove*>(symbols["hw.so"s]["g_clmove"s]);
 }
 
+void Interface::FindEnts()
+{
+	//entNum = reinterpret_cast<i32*>(symbols["svencoop/cl_dlls/client.so"s]["num_ents"s]);
+	//entList = reinterpret_cast<Entity*>(symbols["svencoop/cl_dlls/client.so"s]["ent"s]);
+}
+
 void Interface::HookVMs()
 {
 }

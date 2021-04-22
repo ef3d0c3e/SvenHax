@@ -2,6 +2,8 @@
 #include "../Util/Draw.hpp"
 #include "Hooks.hpp"
 
+#include "../Hacks/ESP.hpp"
+
 #include <mutex>
 
 std::mutex drawMutex;
@@ -10,7 +12,6 @@ void Hooks::PaintImGui()
 {
 	std::unique_lock<std::mutex> lock(drawMutex);
 
-	// TODO: Surface drawing
 
 	int w, h;
 	surface->GetScreenSize(w, h);
@@ -18,6 +19,8 @@ void Hooks::PaintImGui()
 	float height = (float)h;
 	float imWidth = SDL2::windowWidth;
 	float imHeight = SDL2::windowHeight;
+
+	ESP::Paint();
 
 	for (const DrawRequest& value : Draw::drawRequests)
 	{

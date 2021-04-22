@@ -172,8 +172,11 @@ void Config::Load(const std::string& name)
 			if (i+dlen >= content.size())
 				throw Exception("Config::Load(): Could not get data for file '{}' at position '{}'", name, i);
 
-
-			std::memcpy(reinterpret_cast<void*>(&varList[identifier]), reinterpret_cast<const void*>(&content.data()[i]), dlen);
+			const auto it = varList.find(identifier);
+			if (it == varList.end())
+				fmt::print("Config::Load() Cound not find variable '{}' in '{}', was it removed?", identifier, name);
+			else
+				std::memcpy(it->second.p, reinterpret_cast<const void*>(&content.data()[i]), dlen);
 
 			i += dlen;
 		}

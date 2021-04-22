@@ -19,6 +19,7 @@
 #include "../Util/CStructs.hpp"
 
 #include "Entity.hpp"
+#include "TriangleAPI.hpp"
 
 struct EngineFuncs
 {
@@ -131,8 +132,8 @@ struct EngineFuncs
 	char* (*COM_ParseFile)(char* data, char* token);
 	void (*COM_FreeFile)(void* buffer);
 
+	TriangleAPI* pTriAPI;
 	//TODO
-	struct triangleapi_s* pTriAPI;
 	struct efx_api_s* pEfxAPI;
 	struct event_api_s* pEventAPI;
 	struct demo_api_s* pDemoAPI;

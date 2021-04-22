@@ -49,6 +49,7 @@ void MainThread()
 		Interface::FindCEngine();
 		Interface::FindPlayerList();
 		Interface::FindPlayerMove();
+		Interface::FindEnts();
 
 		Interface::HookVMs();
 
