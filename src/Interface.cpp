@@ -52,7 +52,10 @@ CBasePlayer* gPlayerList = nullptr;
 
 ClientDLLFuncs* gClientDllFuncs = nullptr;
 EngineFuncs* gEngineFuncs = nullptr;
+EngineFuncs2* gFuncs = nullptr;
 PlayerMove* gPMove = nullptr;
+std::array<TempEnt, 2048>* gTempEnts = nullptr;
+std::array<EDict, 257>* gEnt = nullptr;
 
 void Interface::FindSymbols()
 {
@@ -152,37 +155,37 @@ void Interface::FindInterfaces()
 		return p;
 	};
 
-	fileSystem      = get.template operator()<CBaseFileSystem>        ("fileSystem",     "filesystem_stdio.so",        "VFileSystem");
+	fileSystem      = get.template operator()<CBaseFileSystem>("fileSystem", "filesystem_stdio.so", "VFileSystem");
 
-	dedicatedServer = get.template operator()<CDedicatedServerAPI>    ("dedicatedServer","hw.so",                      "VENGINE_HLDS_API_VERSION");
-	engineAPI       = get.template operator()<CEngineAPI>             ("engineAPI",      "hw.so",                      "VENGINE_LAUNCHER_API_VERSION");
-	gameUIFuncs     = get.template operator()<CGameUIFuncs>           ("gameUIFuncs",    "hw.so",                      "VENGINE_GAMEUIFUNCS_VERSION");
-	client          = get.template operator()<CEngineClient>          ("client",         "hw.so",                      "SCEngineClient");
-	server          = get.template operator()<CEngineServer>          ("server",         "hw.so",                      "SCEngineServer");
-	remoteAccess    = get.template operator()<CServerRemoteAccess>    ("remoteAccess",   "hw.so",                      "GameServerData");
-	baseUI          = get.template operator()<CBaseUI>                ("baseUI",         "hw.so",                      "BaseUI");
-	engineSurface   = get.template operator()<EngineSurface>          ("engineSurface",  "hw.so",                      "EngineSurface");
-	surface         = get.template operator()<CSurface>               ("surface",        "hw.so",                      "VGUI_Surface");
-	engineVGui      = get.template operator()<CEngineVGui>            ("engineVGui",     "hw.so",                      "VEngineVGui");
+	dedicatedServer = get.template operator()<CDedicatedServerAPI>("dedicatedServer", "hw.so", "VENGINE_HLDS_API_VERSION");
+	engineAPI       = get.template operator()<CEngineAPI>         ("engineAPI",       "hw.so", "VENGINE_LAUNCHER_API_VERSION");
+	gameUIFuncs     = get.template operator()<CGameUIFuncs>       ("gameUIFuncs",     "hw.so", "VENGINE_GAMEUIFUNCS_VERSION");
+	client          = get.template operator()<CEngineClient>      ("client",          "hw.so", "SCEngineClient");
+	server          = get.template operator()<CEngineServer>      ("server",          "hw.so", "SCEngineServer");
+	remoteAccess    = get.template operator()<CServerRemoteAccess>("remoteAccess",    "hw.so", "GameServerData");
+	baseUI          = get.template operator()<CBaseUI>            ("baseUI",          "hw.so", "BaseUI");
+	engineSurface   = get.template operator()<EngineSurface>      ("engineSurface",   "hw.so", "EngineSurface");
+	surface         = get.template operator()<CSurface>           ("surface",         "hw.so", "VGUI_Surface");
+	engineVGui      = get.template operator()<CEngineVGui>        ("engineVGui",      "hw.so", "VEngineVGui");
 
-	clientDLL       = get.template operator()<CCLientDLL>             ("clientDLL",      "svencoop/cl_dlls/client.so", "SCClientDLL");
+	clientDLL       = get.template operator()<CCLientDLL>("clientDLL",      "svencoop/cl_dlls/client.so", "SCClientDLL");
 
-	schemeManager   = get.template operator()<CSchemeManager>         ("schemeManager",  "vgui2.so",                   "VGUI_Scheme");
-	keyValues       = get.template operator()<CVGuiKeyValues>         ("keyValues",      "vgui2.so",                   "KeyValues");
-	panel           = get.template operator()<VPanelWrapper>          ("panel",          "vgui2.so",                   "VGUI_Panel");
-	vgui            = get.template operator()<CVGui>                  ("vgui",           "vgui2.so",                   "VGUI_ivgui");
+	schemeManager   = get.template operator()<CSchemeManager>("schemeManager", "vgui2.so", "VGUI_Scheme");
+	keyValues       = get.template operator()<CVGuiKeyValues>("keyValues",     "vgui2.so", "KeyValues");
+	panel           = get.template operator()<VPanelWrapper> ("panel",         "vgui2.so", "VGUI_Panel");
+	vgui            = get.template operator()<CVGui>         ("vgui",          "vgui2.so", "VGUI_ivgui");
 
-	input           = get.template operator()<CInputWin>              ("input",          "vgui2.so",                   "VGUI_Input");
-	csystem         = get.template operator()<CSystem>                ("csystem",        "vgui2.so",                   "VGUI_System");
+	input           = get.template operator()<CInputWin>("input",   "vgui2.so", "VGUI_Input");
+	csystem         = get.template operator()<CSystem>  ("csystem", "vgui2.so", "VGUI_System");
 
-	careerUI        = get.template operator()<CCareerGame>            ("careerUI",       "svencoop/cl_dlls/gameui.so", "CareerUI");
-	console         = get.template operator()<CGameConsole>           ("console",        "svencoop/cl_dlls/gameui.so", "GameConsole");
-	musicManager    = get.template operator()<MusicManager>           ("musicManager",   "svencoop/cl_dlls/gameui.so", "MusicManager");
-	gameEngine      = get.template operator()<CRunGameEngine>         ("gameEngine",     "svencoop/cl_dlls/gameui.so", "RunGameEngine");
-	moduleLoader    = get.template operator()<CVGuiSystemModuleLoader>("moduleLoader",   "svencoop/cl_dlls/gameui.so", "VGuiModuleLoader");
+	careerUI        = get.template operator()<CCareerGame>            ("careerUI",     "svencoop/cl_dlls/gameui.so", "CareerUI");
+	console         = get.template operator()<CGameConsole>           ("console",      "svencoop/cl_dlls/gameui.so", "GameConsole");
+	musicManager    = get.template operator()<MusicManager>           ("musicManager", "svencoop/cl_dlls/gameui.so", "MusicManager");
+	gameEngine      = get.template operator()<CRunGameEngine>         ("gameEngine",   "svencoop/cl_dlls/gameui.so", "RunGameEngine");
+	moduleLoader    = get.template operator()<CVGuiSystemModuleLoader>("moduleLoader", "svencoop/cl_dlls/gameui.so", "VGuiModuleLoader");
 
-	serverBrowser   = get.template operator()<CServerBrowser>         ("serverBrowser",  "platform/servers/serverbrowser_linux.so", "ServerBrowser");
-	cvar            = get.template operator()<CDefaultCvar>           ("cvar",           "platform/servers/serverbrowser_linux.so", "VEngineCvar");
+	serverBrowser   = get.template operator()<CServerBrowser>("serverBrowser", "platform/servers/serverbrowser_linux.so", "ServerBrowser");
+	cvar            = get.template operator()<CDefaultCvar>  ("cvar",          "platform/servers/serverbrowser_linux.so", "VEngineCvar");
 
 }
 
@@ -285,31 +288,20 @@ void Interface::FindClientDLLFuncs()
 	};
 }
 
-void Interface::FindEngineFuncs()
+void Interface::FindGlobals()
 {
-	gEngineFuncs = new EngineFuncs;
-	std::memcpy(gEngineFuncs, reinterpret_cast<void*>(symbols["svencoop/cl_dlls/client.so"s]["gEngfuncs"s]), sizeof(EngineFuncs));
-}
+	gEngineFuncs = reinterpret_cast<EngineFuncs*>(symbols["svencoop/cl_dlls/client.so"s]["gEngfuncs"s]);
+	gFuncs = reinterpret_cast<EngineFuncs2*>(symbols["hw.so"s]["g_engfuncsExportedToDlls"s]);
 
-void Interface::FindCEngine()
-{
 	engine = reinterpret_cast<CEngine*>(symbols["hw.so"s]["g_Engine"s]);
-}
 
-void Interface::FindPlayerList()
-{
 	gPlayerList = reinterpret_cast<CBasePlayer*>(symbols["svencoop/cl_dlls/client.so"s]["player"s]);
-}
 
-void Interface::FindPlayerMove()
-{
 	gPMove = reinterpret_cast<PlayerMove*>(symbols["hw.so"s]["g_clmove"s]);
-}
 
-void Interface::FindEnts()
-{
-	//entNum = reinterpret_cast<i32*>(symbols["svencoop/cl_dlls/client.so"s]["num_ents"s]);
-	//entList = reinterpret_cast<Entity*>(symbols["svencoop/cl_dlls/client.so"s]["ent"s]);
+	gTempEnts = reinterpret_cast<std::array<TempEnt, 2048>*>(symbols["hw.so"s]["gTempEnts"s]);
+
+	gEnt = reinterpret_cast<std::array<EDict, 257>*>(symbols["svencoop/cl_dlls/client.so"s]["ent"s]);
 }
 
 void Interface::HookVMs()

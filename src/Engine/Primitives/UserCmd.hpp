@@ -7,7 +7,7 @@
 
 struct UserCmd
 {
-	i16 lerp_msec; // Interpolation time on client
+	i16 lerpMsec; // Interpolation time on client
 	u8 msec; // Duration in ms of command
 	QAngle viewAngles; // Command view angles.
 

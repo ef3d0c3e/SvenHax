@@ -1,7 +1,6 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-#include <array>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -74,7 +73,6 @@
 	}
 #define vector_foreach_do(expr) vector_foreach_do_v(expr, false, N)
 
-
 struct VectorSettings
 {
 	////////////////////////////////////////////////////////////
@@ -85,58 +83,85 @@ struct VectorSettings
 
 	bool UseFor = false; ///< Use for loop instead of (force) unrolled loop
 
-	bool UseParallel =
-		true; ///< Use parallelization (The overhead is often not worth the cost)
+	bool UseParallel = true; ///< Use parallelization (The overhead is often not worth the cost)
 	int NumThreads = 0; ///< Number of threads for parallelization (0 = all cpu threads)
 
-	bool UseSIMD =
-		false; ///< Hint the compiler to use SIMD instruction inside the for loop
+	bool UseSIMD = false; ///< Hints the compiler to use SIMD instruction inside the for loop
 	int SIMDSafeLen = 0; ///< Minimum distance for splitting the logical iteration space
 	int SIMDLen = 4; ///< Preferred number of concurrent iterations
 };
 
 /** @cond */
-template <typename U>
-struct __vector_function_traits
-: public __vector_function_traits<decltype(&U::operator())>
-{};
+#define __vector_data_methods                                \
+	__vector_inline T& operator[](std::size_t i)             \
+	{                                                        \
+		return *(reinterpret_cast<T*>(this)+i);              \
+	}                                                        \
+                                                             \
+	__vector_inline const T& operator[](std::size_t i) const \
+	{                                                        \
+		return *(reinterpret_cast<const T*>(this)+i);        \
+	}
 
-template <typename U, typename R, typename... Args>
-struct __vector_function_traits<R (U::*)(Args...) const>
+template <class T, std::size_t N>
+struct __vector_data
 {
-	enum
-	{
-		arity = sizeof...(Args)
-	};
-	using result_type = R;
+	T x, y, z, w, rest[N-4];
 
-	template <std::size_t i>
-	struct arg
-	{
-		//using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
-		typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-	};
+	__vector_data_methods;
 };
 
-
-template <typename... Args>
-struct __vector_variadic
+template <class T>
+struct __vector_data<T, 4>
 {
-	enum
-	{
-		arity = sizeof...(Args)
-	};
+	T x, y, z, w;
 
-	template <std::size_t i>
-	struct arg
-	{
-		using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
-	};
+	__vector_data_methods;
 };
+
+template <class T>
+struct __vector_data<T, 3>
+{
+	T x, y, z;
+
+	__vector_data_methods;
+};
+
+template <class T>
+struct __vector_data<T, 2>
+{
+	T x, y;
+
+	__vector_data_methods;
+};
+
+template <class T>
+struct __vector_data<T, 1>
+{
+	T x;
+
+	__vector_data_methods;
+};
+
+template <class T>
+struct __vector_data<T, 0>
+{
+	__vector_data_methods;
+};
+#undef __vector_data_methods
 /** @endcond */
 
-template <typename T, std::size_t N, VectorSettings S = VectorSettings{}>
-class Vector
+template <class T, std::size_t N, template <class _T, std::size_t _N> class B>
+concept VectorBase = sizeof(T)*N == sizeof(B<T, N>) &&
+requires(B<T, N>& b, std::size_t i)
+{
+	{ static_cast<const B<T, N>&>(b)[i] } -> std::same_as<const T&>;
+	{ b[i] } -> std::same_as<T&>;
+};
+
+template <class T, std::size_t N, template <class, std::size_t> class B = __vector_data, VectorSettings S = VectorSettings{}>
+requires VectorBase<T, N, B>
+class Vector : public B<T, N>
 {
 	////////////////////////////////////////////////////////////
 	/// \class Vector
@@ -149,9 +174,10 @@ class Vector
 	/// vector (usually int or double). Also called 'scalar'
 	/// \tparam N The number of elements of the vector, or
 	/// 'dimension' of the vector
-	///
+	/// \tparam B The base type of the vector (see VectorBase)
+	/// \tparam S The vector's settings
 	////////////////////////////////////////////////////////////
-	std::array<T, N> d;
+	using base_type = B<T, N>;
 
 public:
 	////////////////////////////////////////////////////////////
@@ -170,12 +196,11 @@ public:
 	/// Initializes all elements of the vector to elements of v.
 	///
 	/// \param v Vector to copy from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(Vector& v) noexcept
 	{
-		vector_foreach_do(d[i] = v.d[i]);
+		vector_foreach_do(operator[](i) = v[i]);
 	}
 
 	////////////////////////////////////////////////////////////
@@ -184,12 +209,11 @@ public:
 	/// Initializes all elements of the vector to elements of v.
 	///
 	/// \param v Vector to copy from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(const Vector& v) noexcept
 	{
-		vector_foreach_do(d[i] = v.d[i]);
+		vector_foreach_do(operator[](i) = v[i]);
 	}
 
 	////////////////////////////////////////////////////////////
@@ -198,12 +222,11 @@ public:
 	/// Moves all elements of v into itself.
 	///
 	/// \param v Vector to move from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(Vector&& v) noexcept
 	{
-		vector_foreach_do(d[i] = std::move(v.d[i]));
+		vector_foreach_do(operator[](i) = std::move(v[i]));
 	}
 
 	////////////////////////////////////////////////////////////
@@ -212,12 +235,11 @@ public:
 	/// Moves all elements of v into itself.
 	///
 	/// \param v Vector to move from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(const Vector&& v) noexcept
 	{
-		vector_foreach_do(d[i] = std::move(v.d[i]));
+		vector_foreach_do(operator[](i) = std::move(v[i]));
 	}
 
 	////////////////////////////////////////////////////////////
@@ -226,48 +248,14 @@ public:
 	/// Convert elements from one scalar type to the other.
 	///
 	/// \tparam R The new scalar type
-	///
 	////////////////////////////////////////////////////////////
 	template <typename R>
-	explicit operator Vector<R, N, S>() const noexcept
+	explicit operator Vector<R, N, B, S>() const noexcept
 	{
-		Vector<R, N, S> r;
-		vector_foreach_do(r[i] = static_cast<R>(d[i]));
+		Vector<R, N, B, S> r;
+		vector_foreach_do(r[i] = static_cast<R>(operator[](i)));
 		return r;
 	}
-
-	/*
-	////////////////////////////////////////////////////////////
-	/// \brief Change settings
-	///
-	/// Change the settings of one vector
-	///
-	/// \tparam S The new settings
-	///
-	////////////////////////////////////////////////////////////
-	template <VectorSettings S2> explicit operator Vector<T, N, S>() const noexcept
-	{
-		Vector<T, N, S2> r;
-		vector_foreach_do(r[i] = d[i]);
-		return r;
-	}
-
-	////////////////////////////////////////////////////////////
-	/// \brief Conversion & Change settings
-	///
-	/// Change the settings of one vector and convert its scalar type
-	///
-	/// \tparam S The new settings
-	/// \tparam R The new scalar type
-	///
-	////////////////////////////////////////////////////////////
-	template <typename R, VectorSettings S2>
-	explicit operator Vector<T, N, S>() const noexcept
-	{
-		Vector<R, N, S2> r;
-		vector_foreach_do(r[i] = static_cast<R>(d[i]));
-		return r;
-	}*/
 
 	////////////////////////////////////////////////////////////
 	/// \brief std::initializer_list constructor
@@ -276,13 +264,12 @@ public:
 	/// values contained in list.
 	///
 	/// \param list List of elements
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(const std::initializer_list<T>& list) noexcept
 	{
 		auto it = list.begin();
-		vector_foreach_do_v(d[i] = *(it++), true, N);
+		vector_foreach_do_v(operator[](i) = *(it++), true, N);
 	}
 
 	////////////////////////////////////////////////////////////
@@ -292,14 +279,12 @@ public:
 	/// values contained in arr.
 	///
 	/// \param arr The array to initialize from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(const std::array<T, N>& arr) noexcept
 	{
-		vector_foreach_do(d[i] = arr[i]);
+		vector_foreach_do(operator[](i) = arr[i]);
 	}
-
 
 	////////////////////////////////////////////////////////////
 	/// \brief Array constructor
@@ -309,59 +294,57 @@ public:
 	///
 	/// \param arr The array to initialize from, its size must
 	/// be greater or equal to N
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr Vector(const T* arr) noexcept
 	{
-		vector_foreach_do(d[i] = arr[i]);
+		vector_foreach_do(operator[](i) = arr[i]);
 	}
 
 	auto cbegin() const noexcept
 	{
-		return d.cbegin();
+		return reinterpret_cast<const T*>(this);
 	}
 
 	auto begin() noexcept
 	{
-		return d.begin();
+		return reinterpret_cast<T*>(this);
 	}
 
-	auto cend() const noexcept
+	const auto cend() const noexcept
 	{
-		return d.cend();
+		return reinterpret_cast<const T*>(this) + N;
 	}
 
 	auto end() noexcept
 	{
-		return d.end();
+		return reinterpret_cast<T*>(this) + N;
 	}
 
-	auto crbegin() const noexcept
+	const auto crbegin() const noexcept
 	{
-		return d.crbegin();
+		return reinterpret_cast<const T*>(this) + N - 1;
 	}
 
 	auto rbegin() noexcept
 	{
-		return d.rbegin();
+		return reinterpret_cast<T*>(this) + N - 1;
 	}
 
 	auto crend() const noexcept
 	{
-		return d.crend();
+		return reinterpret_cast<const T*>(this) - 1;
 	}
 
 	auto rend() noexcept
 	{
-		return d.rend();
+		return reinterpret_cast<T*>(this) - 1;
 	}
 
 	////////////////////////////////////////////////////////////
 	/// \brief Size method
 	///
 	/// \returns The number of elements in the vector: N
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		constexpr std::size_t
@@ -379,16 +362,15 @@ public:
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		void
-		Set(T v) noexcept { vector_foreach_do(d[i] = v) }
+		Set(T v) noexcept { vector_foreach_do(operator[](i) = v) }
 
 	////////////////////////////////////////////////////////////
 	/// \brief Clear method
 	///
 	/// Sets all elements of the vector to T()
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
-		void Clear() noexcept { vector_foreach_do(d[i] = T()) }
+		void Clear() noexcept { vector_foreach_do(operator[](i) = T()) }
 
 
 	////////////////////////////////////////////////////////////
@@ -397,13 +379,12 @@ public:
 	/// Copies each elements of v into itself.
 	///
 	/// \param v The vector to copy from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		Vector&
 		operator=(const Vector& v) noexcept
 	{
-		vector_foreach_do(d[i] = v.d[i]);
+		vector_foreach_do(operator[](i) = v[i]);
 		return *this;
 	}
 
@@ -414,9 +395,8 @@ public:
 	///
 	/// \param v Left operand
 	/// \param u Right operand
-	/// \return true if all elements of v and u are equal
+	/// \returns true if all elements of v and u are equal
 	/// (using T::operator==())
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		friend bool
@@ -424,7 +404,7 @@ public:
 	{
 		return [&]<std::size_t... i>(std::index_sequence<i...>)
 		{
-			return ((v.d[i] == u.d[i]) && ...); // shortcut
+			return ((v[i] == u[i]) && ...); // shortcut
 		}
 		(std::make_index_sequence<N>{});
 	}
@@ -436,9 +416,8 @@ public:
 	///
 	/// \param v Left operand
 	/// \param u Right operand
-	/// \return true if at least one element of v differs from
+	/// \returns true if at least one element of v differs from
 	/// u (using T::operator!=())
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		friend bool
@@ -446,7 +425,7 @@ public:
 	{
 		return [&]<std::size_t... i>(std::index_sequence<i...>)
 		{
-			return ((v.d[i] != u.d[i]) || ...); // shortcut
+			return ((v[i] != u[i]) || ...); // shortcut
 		}
 		(std::make_index_sequence<N>{});
 	}
@@ -458,15 +437,15 @@ public:
 	///
 	/// \param stream The stream
 	/// \param v The vector
-	///
 	////////////////////////////////////////////////////////////
+	template <class CharT>
 	/** @cond */ __vector_inline /** @endcond */
-		friend std::ostream&
-		operator<<(std::ostream& stream, const Vector& v) noexcept
+		friend std::basic_ostream<CharT>&
+		operator<<(std::basic_ostream<CharT>& stream, const Vector& v) noexcept
 	{
 		stream << '(';
-		vector_foreach_do_v(stream << v.d[i] << ',' << ' ', true, N - 1) stream
-			<< v.d[N - 1];
+		vector_foreach_do_v(stream << v[i] << ',' << ' ', true, N - 1) stream
+			<< v[N - 1];
 		stream << ')';
 
 		return stream;
@@ -479,13 +458,12 @@ public:
 	///
 	/// \warning Performs no bound checking
 	/// \param i The position to get the element from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		const T&
 		operator[](const std::size_t i) const noexcept
 	{
-		return d[i];
+		return base_type::operator[](i);
 	}
 
 	////////////////////////////////////////////////////////////
@@ -495,13 +473,12 @@ public:
 	///
 	/// \warning Performs no bound checking
 	/// \param i The position to get the element from
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		T&
 		operator[](const std::size_t i) noexcept
 	{
-		return d[i];
+		return base_type::operator[](i);
 	}
 
 	////////////////////////////////////////////////////////////
@@ -510,13 +487,12 @@ public:
 	/// Apply fn to every elements of the vector.
 	///
 	/// \param fn The function to apply
-	///
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		void
 		Apply(std::function<T(T)> fn) noexcept
 	{
-		vector_foreach_do(d[i] = fn(d[i]));
+		vector_foreach_do(operator[](i) = fn(operator[](i)));
 	}
 
 	////////////////////////////////////////////////////////////
@@ -528,16 +504,15 @@ public:
 	///
 	/// \param fn The function to use for reducing
 	/// \tparam noParallel Override ```.UseParallel```
-	/// \return A single T, containing the reduced input
-	///
+	/// \returns A single T, containing the reduced input
 	////////////////////////////////////////////////////////////
 	template <bool noParallel = false>
 	/** @cond */ __vector_inline /** @endcond */
 		T
 		Reduce(std::function<T(T, T)> fn) const noexcept
 	{
-		T r = d[0];
-		vector_foreach_do_v((r = fn(r, d[i + 1])), noParallel, N - 1)
+		T r = operator[](0);
+		vector_foreach_do_v((r = fn(r, operator[](i+1))), noParallel, N - 1)
 
 			return r;
 	}
@@ -552,15 +527,14 @@ public:
 	/// \endcode
 	///
 	/// \param fn The function to use for comparing
-	/// \return The resulting T
-	///
+	/// \returns The resulting T
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		T
 		Get(std::function<bool(T, T)> fn) const noexcept
 	{
-		T ret = d[0];
-		vector_foreach_do(ret = (fn(ret, d[i])) ? d[i] : ret);
+		T ret = operator[](0);
+		vector_foreach_do(ret = (fn(ret, operator[](i))) ? operator[](i) : ret);
 
 		return ret;
 	}
@@ -576,8 +550,7 @@ public:
 	/// \endcode
 	///
 	/// \param fn The function to use for matching
-	/// \return A list of element that matched
-	///
+	/// \returns A list of element that matched
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		std::vector<T>
@@ -585,41 +558,49 @@ public:
 	{
 		std::vector<T> r;
 
-		vector_foreach_do((fn(d[i])) ? r.push_back(d[i]) : void());
+		vector_foreach_do((fn(operator[](i))) ? r.push_back(operator[](i)) : void());
 
 		return r;
 	}
 
-#define OPERATOR(op)                              \
-	/** @cond */ __vector_inline /** @endcond */  \
-		Vector                                    \
-		operator op(Vector v) const noexcept      \
-	{                                             \
-		vector_foreach_do(v[i] = d[i] op v.d[i]); \
-		return v;                                 \
-	}                                             \
-	/** @cond */ __vector_inline /** @endcond */  \
-		Vector&                                   \
-		operator op##=(const Vector& v) noexcept  \
-	{                                             \
-		vector_foreach_do(d[i] op## = v[i]);      \
-		return *this;                             \
-	}                                             \
-	/** @cond */ __vector_inline /** @endcond */  \
-		Vector                                    \
-		operator op(T k) const noexcept           \
-	{                                             \
-		Vector v(d);                              \
-		vector_foreach_do(v[i] op## = k);         \
-		return v;                                 \
-	}                                             \
-	/** @cond */ __vector_inline /** @endcond */  \
-		Vector&                                   \
-		operator op##=(T k) noexcept              \
-	{                                             \
-		vector_foreach_do(d[i] op## = k);         \
-		return *this;                             \
+#define OPERATOR(op)                                     \
+	/** @cond */ __vector_inline /** @endcond */         \
+		Vector                                           \
+		operator op(Vector v) const noexcept             \
+	{                                                    \
+		vector_foreach_do(v[i] = operator[](i) op v[i]); \
+		return v;                                        \
+	}                                                    \
+	/** @cond */ __vector_inline /** @endcond */         \
+		Vector&                                          \
+		operator op##=(const Vector& v) noexcept         \
+	{                                                    \
+		vector_foreach_do(operator[](i) op## = v[i]);    \
+		return *this;                                    \
+	}                                                    \
+	/** @cond */ __vector_inline /** @endcond */         \
+		Vector                                           \
+		operator op(T k) const noexcept                  \
+	{                                                    \
+		Vector v(*this);                                 \
+		vector_foreach_do(v[i] op## = k);                \
+		return v;                                        \
+	}                                                    \
+	/** @cond */ __vector_inline /** @endcond */         \
+		Vector                                           \
+		friend operator op(T k, Vector v) noexcept       \
+	{                                                    \
+		vector_foreach_do(v[i] op## = k);                \
+		return v;                                        \
+	}                                                    \
+	/** @cond */ __vector_inline /** @endcond */         \
+		Vector&                                          \
+		operator op##=(T k) noexcept                     \
+	{                                                    \
+		vector_foreach_do(operator[](i) op## = k);       \
+		return *this;                                    \
 	}
+
 	OPERATOR(+);
 	OPERATOR(-);
 	OPERATOR(*);
@@ -632,31 +613,47 @@ public:
 
 	/** @cond */ __vector_inline /** @endcond */
 		Vector
-		operator%(Vector v) noexcept
+		operator-() const noexcept
 	{
-		vector_foreach_do(v[i] = d[i] % v[i]);
+		Vector v(*this);
+		vector_foreach_do(v[i] = -v[i]);
+		return v;
+	}
+
+	/** @cond */ __vector_inline /** @endcond */
+		Vector
+		operator%(Vector v) const noexcept
+	{
+		vector_foreach_do(v[i] = operator[](i) % v[i]);
 		return v;
 	}
 	/** @cond */ __vector_inline /** @endcond */
 		Vector&
 		operator%=(const Vector& v) noexcept
 	{
-		vector_foreach_do(d[i] = d[i] % v[i]);
+		vector_foreach_do(operator[](i) = operator[](i) % v[i]);
 		return *this;
 	}
 	/** @cond */ __vector_inline /** @endcond */
 		Vector
-		operator%(T k) noexcept
+		operator%(T k) const noexcept
 	{
-		Vector v(d);
-		vector_foreach_do(v[i] = d[i] % k);
+		Vector v(*this);
+		vector_foreach_do(v[i] = operator[](i) % k);
+		return v;
+	}
+	/** @cond */ __vector_inline /** @endcond */
+		Vector
+		friend operator%(T k, Vector v) noexcept
+	{
+		vector_foreach_do(v[i] = operator[](i) % k);
 		return v;
 	}
 	/** @cond */ __vector_inline /** @endcond */
 		Vector&
 		operator%=(T k) noexcept
 	{
-		vector_foreach_do(d[i] = d[i] % k);
+		vector_foreach_do(operator[](i) = operator[](i) % k);
 		return *this;
 	}
 #undef OPERATOR
@@ -674,8 +671,7 @@ public:
 	///
 	/// \tparam R the type in wwhich to calculate the result
 	///
-	/// \return A scalar containing the distance
-	///
+	/// \returns A scalar containing the distance
 	////////////////////////////////////////////////////////////
 	template <typename R = T>
 	/** @cond */ __vector_inline /** @endcond */
@@ -683,7 +679,7 @@ public:
 		Length() const noexcept
 	{
 		T x = T();
-		vector_foreach_do(x += d[i]*d[i])
+		vector_foreach_do(x += operator[](i))
 
 		if constexpr (std::is_same_v<T, R>)
 			return std::sqrt(x);
@@ -701,15 +697,14 @@ public:
 	/// auto x = u.Manhattan(u) // 15
 	/// \endcode
 	///
-	/// \return A scalar containing the distance
-	///
+	/// \returns A scalar containing the distance
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		T
 		Manhattan() const noexcept
 	{
 		T r = T();
-		vector_foreach_do(r += std::abs(d[i]));
+		vector_foreach_do(r += std::abs(operator[](i)));
 
 		return r;
 	}
@@ -724,15 +719,14 @@ public:
 	/// auto x = u.LengtSqr(u) // 125
 	/// \endcode
 	///
-	/// \return A scalar containing the distance
-	///
+	/// \returns A scalar containing the distance
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		T
 		LengthSqr() const noexcept
 	{
 		T r = T();
-		vector_foreach_do(r += d[i] * d[i]);
+		vector_foreach_do(r += operator[](i) * operator[](i));
 
 		return r;
 	}
@@ -743,7 +737,7 @@ public:
 		Normalize() noexcept
 	{
 		const R n = Length<R>();
-		vector_foreach_do(d[i] /= n);
+		vector_foreach_do(operator[](i) /= n);
 	}
 
 	////////////////////////////////////////////////////////////
@@ -759,8 +753,7 @@ public:
 	///
 	/// \param u Left operand
 	/// \param v Right operand
-	/// \return A scalar containing the dot product of u and v
-	///
+	/// \returns A scalar containing the dot product of u and v
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		friend T
@@ -788,20 +781,19 @@ public:
 	///
 	/// \param u Left operand
 	/// \param v Right operand
-	/// \return A vector equal to the product (scalar/vectorial) of u and v
-	///
+	/// \returns A vector equal to the product (scalar/vectorial) of u and v
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
-		friend Vector<T, N, S>
+		friend Vector<T, N, B, S>
 		Product(const Vector& u, const Vector& v) noexcept
 	{
 		static_assert(N == 3);
 
-		Vector<T, 3, S> r;
+		Vector<T, 3, B, S> r;
 
-		r.d[0] = u.d[1] * v.d[2] - u.d[2] * v.d[1];
-		r.d[1] = u.d[2] * v.d[0] - u.d[0] * v.d[2];
-		r.d[2] = u.d[0] * v.d[1] - u.d[1] * v.d[0];
+		r[0] = u[1] * v[2] - u[2] * v[1];
+		r[1] = u[2] * v[0] - u[0] * v[2];
+		r[2] = u[0] * v[1] - u[1] * v[0];
 
 		return r;
 	}
@@ -821,8 +813,7 @@ public:
 	///
 	/// \param u Left operand
 	/// \param v Right operand
-	/// \return A scalar equal to the cross product of u and v
-	///
+	/// \returns A scalar equal to the cross product of u and v
 	////////////////////////////////////////////////////////////
 	/** @cond */ __vector_inline /** @endcond */
 		friend T
@@ -838,7 +829,6 @@ public:
 	///
 	/// Contains informations about an intersection of two
 	/// segments
-	///
 	////////////////////////////////////////////////////////////
 	enum class Intersection : std::uint8_t
 	{
@@ -868,23 +858,22 @@ public:
 	/// coordinates of the intersection point. Usually float or
 	/// double.
 	///
-	/// \return A pair containing:
+	/// \returns A pair containing:
 	/// -# The type of intersection,
 	/// -# (If there is an intersection) the coordinates of the intersection point
 	///
 	/// \see Intersection
-	///
 	////////////////////////////////////////////////////////////
 	template <typename R>
 	/** @cond */ __vector_inline /** @endcond */
-		std::pair<Intersection, Vector<R, N, S>> static Intersect(
+		std::pair<Intersection, Vector<R, N, B, S>> static Intersect(
 			const std::pair<Vector, Vector>& s1,
 			const std::pair<Vector, Vector>& s2,
 			R eps = R(0.005)) noexcept
 	{
 		static_assert(N == 2);
 
-		Vector<R, N, S> pt;
+		Vector<R, N, B, S> pt;
 		auto Zero = [=]<typename K>(K x) { return std::abs(x) < eps; };
 
 		Vector r = s1.second - s1.first;
@@ -901,25 +890,14 @@ public:
 
 		if ((R(0 - eps) <= t && t <= R(1 + eps)) && (R(0 - eps) <= u && u <= R(1 + eps)))
 		{
-			pt = static_cast<Vector<R, N, S>>(s1.first) +
-				 static_cast<Vector<R, N, S>>(r) * t;
+			pt = static_cast<Vector<R, N, B, S>>(s1.first) +
+				 static_cast<Vector<R, N, B, S>>(r) * t;
 
 			return { Intersection::POINT, pt };
 		}
 
 		return { Intersection::NONE, pt };
 	}
-
-	/* TODO: Implement line sweep algorithm
-	template <typename R>
-		std::pair<Intersection, Vector<R, N>> static Intersect(
-			const std::vector<std::pair<Vector, Vector>>& list,
-			R eps = R(0.005))
-	{
-		static_assert(N == 2);
-		// TODO
-	}
-	*/
 
 	////////////////////////////////////////////////////////////
 	/// \brief Get element
@@ -937,7 +915,7 @@ public:
 		decltype(auto)
 		get() const noexcept
 	{
-		return d[M];
+		return operator[](M);
 	}
 
 	template <class... Args>
@@ -946,44 +924,26 @@ public:
 		static_assert(sizeof...(Args) == N);
 
 		std::size_t i = 0;
-		((d[i++] = args), ...);
+		((operator[](i++) = args), ...);
 	}
 };
 /** @cond */
 namespace std
 {
-template <typename T, std::size_t N, VectorSettings S>
-struct tuple_size<Vector<T, N, S>> : std::integral_constant<std::size_t, N>
+template <typename T, std::size_t N, template <class _T, std::size_t _N> class B, VectorSettings S>
+struct tuple_size<Vector<T, N, B, S>> : std::integral_constant<std::size_t, N>
 {};
 }
 
 namespace std
 {
-template <typename T, std::size_t N, VectorSettings S, std::size_t M>
-struct tuple_element<M, Vector<T, N, S>>
+template <typename T, std::size_t N, template <class _T, std::size_t _N> class B, VectorSettings S, std::size_t M>
+struct tuple_element<M, Vector<T, N, B, S>>
 {
 	using type = T;
 };
 }
 /** @endcond */
-
-template <typename... Args>
-/** @cond */ __vector_inline /** @endcond */
-	auto
-	Nary(auto fn, Args... args) noexcept
-{
-	static_assert(__vector_function_traits<decltype(fn)>::arity == __vector_variadic<Args...>::arity);
-
-	/*
-	[&]<std::size_t... i>(std::index_sequence<i...>)
-	{
-		((std::cout << typeid(__vector_function_traits<decltype(fn)>::arg<i>::type>()).name() << i << "\n"), ...);
-	}
-	(std::make_index_sequence<__vector_function_traits<decltype(fn)>::arity>{});
-	*/
-
-	return fn(args...);
-}
 
 #undef __expand
 #undef vector_foreach_do

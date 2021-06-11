@@ -6,7 +6,7 @@
 
 namespace ESP
 {
-	bool WorldToScreen(Vec3& point, ImVec2& screen);
+	bool WorldToScreen(const Vec3& point, ImVec2& screen);
 	void Paint();
 }
 

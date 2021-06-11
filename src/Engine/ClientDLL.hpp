@@ -11,9 +11,9 @@
 #include "Primitives/WeaponData.hpp"
 #include "Primitives/EntityState.hpp"
 #include "Primitives/NetAdr.hpp"
-#include "Primitives/TempEnt.hpp"
 #include "Primitives/StudioInterface.hpp"
 #include "EngineStudioApi.hpp"
+#include "TempEnt.hpp"
 
 struct ClientDLLFuncs
 {

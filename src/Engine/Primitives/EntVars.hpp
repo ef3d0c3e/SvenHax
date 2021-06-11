@@ -42,7 +42,7 @@ struct EntVars
 	i32 viewModel; // player's viewmodel
 	i32 weaponModel; // what other players see
 
-	Vec3 absMin; // BB max translated to world coord
+	Vec3 absMin; // BB min translated to world coord
 	Vec3 absMax; // BB max translated to world coord
 	Vec3 mins; // local BB min
 	Vec3 maxs; // local BB max
@@ -89,7 +89,7 @@ struct EntVars
 	i32 button;
 	i32 impulse;
 
-	EDict* chain; // Entity poi32er when linked into a linked list
+	EDict* chain; // Entity pointer when linked into a linked list
 	EDict* dmgInflictor;
 	EDict* enemy;
 	EDict* aiment; // entity pointer when MOVETYPE_FOLLOW

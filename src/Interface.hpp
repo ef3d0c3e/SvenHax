@@ -7,6 +7,7 @@
 #include "Util/Symbol.hpp"
 #include "Engine/ClientDLL.hpp"
 #include "Engine/Engine.hpp"
+#include "Engine/EngineFuncs.hpp"
 
 extern CBaseFileSystem* fileSystem;
 extern CDedicatedServerAPI* dedicatedServer;
@@ -43,12 +44,8 @@ namespace Interface
 	void DumpInterfaces();
 
 	void FindClientDLLFuncs();
-	void FindEngineFuncs();
 
-	void FindCEngine();
-	void FindPlayerList();
-	void FindPlayerMove();
-	void FindEnts();
+	void FindGlobals();
 
 	void HookVMs();
 }

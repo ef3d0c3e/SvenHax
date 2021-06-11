@@ -20,9 +20,11 @@ struct EDict
 
 	void* privateData; // Alloced and freed by engine, used by DLLs
 
-	EntVars v; // C exported fields from progs
+	EntVars vars; // C exported fields from progs
 
 	// other fields from progs come immediately after
 };
+
+extern std::array<EDict, 257>* gEnt;
 
 #endif // ENGINE_PRIMITIVES_EDICT_HPP

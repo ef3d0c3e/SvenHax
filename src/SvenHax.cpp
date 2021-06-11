@@ -8,6 +8,7 @@
 
 #include "Engine/ClientDLL.hpp"
 #include "Engine/Engine.hpp"
+#include "Engine/TempEnt.hpp"
 
 #include "Util/Maps.hpp"
 #include "Util/VMT.hpp"
@@ -44,12 +45,8 @@ void MainThread()
 		Interface::FindInterfaces();
 
 		Interface::FindClientDLLFuncs();
-		Interface::FindEngineFuncs();
 
-		Interface::FindCEngine();
-		Interface::FindPlayerList();
-		Interface::FindPlayerMove();
-		Interface::FindEnts();
+		Interface::FindGlobals();
 
 		Interface::HookVMs();
 
@@ -59,6 +56,7 @@ void MainThread()
 		CreateMove::HookCreateMove();
 		
 		console->DPrintf("SvenHax Successfully Loaded...\n");
+		fmt::print("sizeof() = {}\n", sizeof(EDict));
 
 	}
 	catch (Exception& e)
@@ -93,3 +91,7 @@ void __attribute__((destructor)) Shutdown()
 
 	Message("Unloaded");
 }
+
+/*
+ * gTempEnts size: 3068 * 2048
+ */
