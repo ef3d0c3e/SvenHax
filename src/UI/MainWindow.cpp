@@ -20,6 +20,7 @@ void UI::MainWindow()
 
 	if (ImGui::Begin("SvenHax", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus))
 	{
+		ImGui::SetWindowSize(ImVec2(950, 600));
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, 0xFFF00000);
 		ImGui::BeginChild("##TABLIST", ImVec2(0, 58), true);
 		ImGui::PopStyleColor();

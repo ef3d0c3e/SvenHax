@@ -3,6 +3,7 @@
 
 #include "../Hacks/BHop.hpp"
 #include "../Hacks/AutoStrafer.hpp"
+#include "../Hacks/RainbowModel.hpp"
 
 void MovementsLeft()
 {
@@ -40,6 +41,22 @@ void MovementsRight()
 void OtherLeft()
 {
 	Child("##OTHERRIGHT", 250);
+	ImGui::Text("Rainbow Model");
+
+	UI::Checkbox("Top", &Settings::RainbowModel::top);
+	Export<"rainbowmodel.top">(Settings::RainbowModel::top);
+	ImGui::Text("Top Speed");
+	UI::SliderFloat("##TOP_SPEED", &Settings::RainbowModel::topSpeed, 0.f, 0.f, 8.f, "%.2f");
+	Export<"rainbowmodel.topSpeed">(Settings::RainbowModel::topSpeed);
+	UI::Desc("Color rotation speed");
+
+	UI::Checkbox("Bottom", &Settings::RainbowModel::bottom);
+	Export<"rainbowmodel.bottom">(Settings::RainbowModel::bottom);
+	ImGui::Text("Bottom Speed");
+	UI::SliderFloat("##BOTTOM_SPEED", &Settings::RainbowModel::bottomSpeed, 0.f, 0.f, 8.f, "%.2f");
+	Export<"rainbowmodel.bottomSpeed">(Settings::RainbowModel::bottomSpeed);
+	UI::Desc("Color rotation speed");
+
 	EndChild();
 }
 

@@ -26,6 +26,7 @@
 #include "CVGuiSystemModuleLoader.hpp"
 #include "CServerBrowser.hpp"
 #include "CDefaultCvar.hpp"
+#include "CStudioModelRenderer.hpp"
 
 #include "CEngine.hpp"
 #include "CBasePlayer.hpp"

@@ -11,7 +11,6 @@
 #include "Engine/TempEnt.hpp"
 
 #include "Util/Maps.hpp"
-#include "Util/VMT.hpp"
 #include "Interface.hpp"
 #include "Hooks/Hooks.hpp"
 
@@ -56,7 +55,7 @@ void MainThread()
 		CreateMove::HookCreateMove();
 		
 		console->DPrintf("SvenHax Successfully Loaded...\n");
-		fmt::print("sizeof() = {}\n", sizeof(EDict));
+		fmt::print("EntityState = {}", sizeof(EntityState));
 
 	}
 	catch (Exception& e)

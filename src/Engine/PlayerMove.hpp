@@ -131,7 +131,7 @@ struct PlayerMove
 	PhysEnt moveEnts[MaxMoveEnts];
 
 	// All things being rendered, for tracing against things you don't actually collide with
-	i32 numBisEnt;
+	i32 numVisEnt;
 	PhysEnt visEnts[PhysEnt::Max];
 
 	// input to run through physics.

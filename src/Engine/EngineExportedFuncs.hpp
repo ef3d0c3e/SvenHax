@@ -1,5 +1,5 @@
-#ifndef ENGINE_ENGINECLIENT_HPP
-#define ENGINE_ENGINECLIENT_HPP
+#ifndef ENGINE_ENGINEEXPORTEDFUNCS_HPP
+#define ENGINE_ENGINEEXPORTEDFUNCS_HPP
 
 #include "Primitives/CVar.hpp"
 #include "Primitives/EDict.hpp"
@@ -28,9 +28,8 @@ MAKE_CENUM_Q(ForceType, i32,
 struct TraceResult;
 struct sentenceEntry_s;
 struct sequenceEntry_s;
-struct CRC32_t;
 struct delta_s;
-struct EngineFuncs2
+struct EngineExportedFuncs
 {
 	int			(*pfnPrecacheModel)			(char* s);
 	int			(*pfnPrecacheSound)			(char* s);
@@ -55,7 +54,7 @@ struct EngineFuncs2
 	void		(*pfnAngleVectors)			(const f32 *rgflVector, f32 *forward, f32 *right, f32 *up);
 	EDict*	(*pfnCreateEntity)			(void);
 	void		(*pfnRemoveEntity)			(EDict* e);
-	EDict*	(*pfnCreateNamedEntity)		(int className);
+	EDict*	(*pfnCreateNamedEntity)		(StringT className);
 	void		(*pfnMakeStatic)			(EDict *ent);
 	int			(*pfnEntIsOnFloor)			(EDict *e);
 	int			(*pfnDropToFloor)			(EDict* e);
@@ -100,7 +99,7 @@ struct EngineFuncs2
 	void		(*pfnFreeEntPrivateData)	(EDict *pEdict);
 	const char*	(*StringFromIndex)			(StringT iString);
 	int			(*pfnAllocString)			(const char *szValue);
-	struct entvars_s*	(*pfnGetVarsOfEnt)			(EDict *pEdict);
+	EntVars*	(*pfnGetVarsOfEnt)			(EDict *pEdict);
 	EDict*	(*pfnPEntityOfEntOffset)	(int iEntOffset);
 	int			(*pfnEntOffsetOfPEntity)	(const EDict *pEdict);
 	int			(*pfnIndexOfEdict)			(const EDict *pEdict);
@@ -118,10 +117,10 @@ struct EngineFuncs2
 	const char *(*pfnCmd_Argv)				( int argc );	// so game DLL can easily 
 	int			(*pfnCmd_Argc)				( void );		// access client 'cmd' strings
 	void		(*pfnGetAttachment)			(const EDict *pEdict, int iAttachment, f32 *rgflOrigin, f32 *rgflAngles );
-	void		(*pfnCRC32_Init)			(CRC32_t *pulCRC);
-	void        (*pfnCRC32_ProcessBuffer)   (CRC32_t *pulCRC, void *p, int len);
-	void		(*pfnCRC32_ProcessByte)     (CRC32_t *pulCRC, unsigned char ch);
-	CRC32_t		(*pfnCRC32_Final)			(CRC32_t pulCRC);
+	void		(*pfnCRC32_Init)			(CRC32 *pulCRC);
+	void        (*pfnCRC32_ProcessBuffer)   (CRC32 *pulCRC, void *p, int len);
+	void		(*pfnCRC32_ProcessByte)     (CRC32 *pulCRC, unsigned char ch);
+	CRC32		(*pfnCRC32_Final)			(CRC32 pulCRC);
 	i32		(*pfnRandomLong)			(i32  lLow,  i32  lHigh);
 	f32		(*pfnRandomFloat)			(f32 flLow, f32 flHigh);
 	void		(*pfnSetView)				(const EDict *pClient, const EDict *pViewent );
@@ -175,7 +174,7 @@ struct EngineFuncs2
 
 	void		(*pfnSetGroupMask)			( int mask, int op );
 
-	int			(*pfnCreateInstancedBaseline) ( int classname, struct entity_state_s *baseline );
+	int			(*pfnCreateInstancedBaseline) ( StringT classname, struct entity_state_s *baseline );
 	void		(*pfnCvar_DirectSet)		( struct cvar_s *var, char *value );
 
 	// Forces the client and server to be running with the same version of the specified file
@@ -222,6 +221,6 @@ struct EngineFuncs2
     void        (*pfnQueryClientCvarValue2)             ( const EDict *player, const char *cvarName, int requestID );
 };
 
-extern EngineFuncs2* gFuncs;
+extern EngineExportedFuncs* gExportedFuncs;
 
-#endif // ENGINE_ENGINECLIENT_HPP
+#endif // ENGINE_ENGINEEXPORTEDFUNCS_HPP

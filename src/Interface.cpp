@@ -52,10 +52,15 @@ CBasePlayer* gPlayerList = nullptr;
 
 ClientDLLFuncs* gClientDllFuncs = nullptr;
 EngineFuncs* gEngineFuncs = nullptr;
-EngineFuncs2* gFuncs = nullptr;
+EngineExportedFuncs* gExportedFuncs = nullptr;
+EngineStudioApi* gStudioApi = nullptr;
 PlayerMove* gPMove = nullptr;
 std::array<TempEnt, 2048>* gTempEnts = nullptr;
 std::array<EDict, 257>* gEnt = nullptr;
+
+CStudioModelRenderer* gStudioRenderer = nullptr;
+
+VMT* studioRendererVMT = nullptr;
 
 void Interface::FindSymbols()
 {
@@ -291,7 +296,9 @@ void Interface::FindClientDLLFuncs()
 void Interface::FindGlobals()
 {
 	gEngineFuncs = reinterpret_cast<EngineFuncs*>(symbols["svencoop/cl_dlls/client.so"s]["gEngfuncs"s]);
-	gFuncs = reinterpret_cast<EngineFuncs2*>(symbols["hw.so"s]["g_engfuncsExportedToDlls"s]);
+	gExportedFuncs = reinterpret_cast<EngineExportedFuncs*>(symbols["hw.so"s]["g_engfuncsExportedToDlls"s]);
+
+	gStudioApi = reinterpret_cast<EngineStudioApi*>(symbols["svencoop/cl_dlls/client.so"s]["IEngineStudio"s]);
 
 	engine = reinterpret_cast<CEngine*>(symbols["hw.so"s]["g_Engine"s]);
 
@@ -302,8 +309,15 @@ void Interface::FindGlobals()
 	gTempEnts = reinterpret_cast<std::array<TempEnt, 2048>*>(symbols["hw.so"s]["gTempEnts"s]);
 
 	gEnt = reinterpret_cast<std::array<EDict, 257>*>(symbols["svencoop/cl_dlls/client.so"s]["ent"s]);
+
+	gStudioRenderer = reinterpret_cast<CStudioModelRenderer*>(symbols["svencoop/cl_dlls/client.so"s]["g_StudioRenderer"s]);
 }
 
 void Interface::HookVMs()
 {
+	studioRendererVMT = new VMT(gStudioRenderer);
+	studioRendererVMT->HookVM(StudioModelRenderer::StudioDrawModel, 3);
+	studioRendererVMT->HookVM(StudioModelRenderer::StudioDrawPlayer, 4);
+	studioRendererVMT->HookVM(StudioModelRenderer::StudioDrawMonster, 5);
+	studioRendererVMT->ApplyVMT();
 }

@@ -25,7 +25,6 @@ static void general_1()
 
 	if (UI::Button("Button"))
 	{
-
 	}
 
 	EndChild();

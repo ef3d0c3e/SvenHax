@@ -37,7 +37,6 @@ public:
 	{
 		return getvfunc<bool(*)(CBasePlayer*)>(this, 218)(this);
 	}
-
 };
 
 static constexpr std::size_t MaxPlayers = 32;

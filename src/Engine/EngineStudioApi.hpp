@@ -7,10 +7,10 @@
 #include "Primitives/CacheUser.hpp"
 #include "Primitives/EntityState.hpp"
 #include "Primitives/PlayerInfo.hpp"
+#include "Primitives/ALight.hpp"
 
 struct EngineStudioApi
 {
-	/*
 	// Allocate number*size bytes and zero it
 	void* (*Mem_Calloc)(i32 number, size_t size);
 	// Check to see if pointer is in the cache
@@ -26,7 +26,7 @@ struct EngineStudioApi
 	// Get entity that is set for rendering
 	Entity* (*GetCurrentEntity)(void);
 	// Get referenced player_info_t
-	PlayerInfo* (*PlayerInfo)(i32 index);
+	PlayerInfo* (*GetPlayerInfo)(i32 index);
 	// Get most recently received player state data from network system
 	EntityState* (*GetPlayerState)(i32 index);
 	// Get viewentity
@@ -101,7 +101,8 @@ struct EngineStudioApi
 	void (*StudioSetRenderamt)(i32 iRenderamt); //!!!CZERO added for rendering glass on viewmodels
 	void (*StudioSetCullState)(i32 iCull);
 	void (*StudioRenderShadow)(i32 iSprite, f32* p1, f32* p2, f32* p3, f32* p4);
-	*/
 };
+
+extern EngineStudioApi* gStudioApi;
 
 #endif // ENGINE_ENGINESTUDIOAPI_HPP

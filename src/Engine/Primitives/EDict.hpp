@@ -26,5 +26,6 @@ struct EDict
 };
 
 extern std::array<EDict, 257>* gEnt;
+static constexpr inline std::size_t EDictEntsNum = 2048;
 
 #endif // ENGINE_PRIMITIVES_EDICT_HPP

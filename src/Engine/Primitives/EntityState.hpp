@@ -24,7 +24,7 @@ struct EntityState
 	QAngle angles;
 
 	i32 modelIndex;
-	i32 sequence;
+	i32 sequence; // animation sequence
 	f32 frame;
 	i32 colorMap;
 	i16 skin;
@@ -35,9 +35,32 @@ struct EntityState
 	u8 eflags;
 
 	// Render information
+	// 0 = Normal
+	// 1 = Color
+	// 2 = Texture
+	// 3 = Glow
+	// 4 = Solid
+	// 5 = Additive
 	i32 renderMode;
 	i32 renderAmt;
 	Color24 renderColor;
+	// 0 = Normal
+	// 1 = Slow Pulse
+	// 2 = Fast Pulse
+	// 3 = Slow Wide Pulse
+	// 4 = Fast Wide Pulse
+	// 5 = Slow Fade Away
+	// 6 = Fast Fade Away
+	// 7 = Slow Become Solid
+	// 8 = Fast Become Solid
+	// 9 = Slow Strobe
+	// 10 = Fast Strobe
+	// 11 = Faster Strobe
+	// 12 = Slow Flicker
+	// 13 = Fast Flicker
+	// 14 = Constant Glow
+	// 15 = Distort
+	// 16 = Hologram (Distort and Fade)
 	i32 renderFx;
 
 	i32 moveType;
@@ -71,12 +94,12 @@ struct EntityState
 	// If standing on conveyor, e.g.
 	Vec3 baseVelocity;
 	// Use the crouched hull, or the regular player hull.
-	i32 useHull;
+	QBool useHull;
 	// Latched buttons last time state updated.
 	i32 oldButtons;
 	// -1 = in air, else pmove entity number
 	i32 onGround;
-	i32 iStepLeft;
+	i32 stepLeft;
 	// How fast we are falling
 	f32 fallVelocity;
 

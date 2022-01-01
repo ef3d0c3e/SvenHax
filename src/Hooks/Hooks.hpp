@@ -4,6 +4,7 @@
 #include "../SDK/SDK.hpp"
 #include "../Interface.hpp"
 #include "../Engine/ClientDLL.hpp"
+#include <vector>
 
 namespace Hooks
 {
@@ -46,6 +47,15 @@ namespace SDL2
 
 	void HookPollEvent();
 	void UnhookPollEvent();
+}
+
+namespace StudioModelRenderer
+{
+	i32 StudioDrawModel(CStudioModelRenderer* thisptr, i32 flags);
+	i32 StudioDrawPlayer(CStudioModelRenderer* thisptr, i32 flags, EntityState* player);
+	i32 StudioDrawMonster(CStudioModelRenderer* thisptr, i32 flags, Entity* monster);
+
+	extern std::vector<Entity*> monsterList;
 }
 
 #endif // HOOKS_HOOKS_HPP

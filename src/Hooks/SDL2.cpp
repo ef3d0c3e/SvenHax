@@ -20,6 +20,7 @@ INCBIN(IBMPlexMonoText, "../src/UI/Res/IBMPlexMono-Text.ttf");
 INCBIN(MinecraftiaRegular, "../src/UI/Res/Minecraftia-Regular.ttf");
 
 #include <fmt/format.h>
+#include <iostream>
 
 int SDL2::windowWidth = 0;
 int SDL2::windowHeight = 0;
@@ -175,7 +176,6 @@ static void SwapWindow(SDL_Window* window)
 
 		UI::UpdateColors();
 
-	
 		ImGuiStyle* style = &ImGui::GetStyle();
 		style->WindowPadding = ImVec2(0, 0);
 		style->FramePadding = ImVec2(4, 4);
@@ -244,6 +244,9 @@ static void SwapWindow(SDL_Window* window)
 		ImGui::End();
 	}
 	ImGui::EndFrame();
+
+	StudioModelRenderer::monsterList.clear();
+	StudioModelRenderer::monsterList.reserve(1024);
 
 	ImGui::GetCurrentContext()->Font->DisplayOffset = ImVec2(0.f, 0.f);
 	ImGui::GetCurrentContext()->Font->DisplayOffset = ImVec2(0.0f, 0.0f);

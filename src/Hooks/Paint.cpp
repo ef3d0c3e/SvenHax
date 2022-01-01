@@ -3,6 +3,7 @@
 #include "Hooks.hpp"
 
 #include "../Hacks/ESP.hpp"
+#include "../Hacks/RainbowModel.hpp"
 
 #include <mutex>
 
@@ -12,7 +13,6 @@ void Hooks::PaintImGui()
 {
 	std::unique_lock<std::mutex> lock(drawMutex);
 
-
 	int w, h;
 	surface->GetScreenSize(w, h);
 	float width = (float)w;
@@ -20,7 +20,9 @@ void Hooks::PaintImGui()
 	float imWidth = SDL2::windowWidth;
 	float imHeight = SDL2::windowHeight;
 
+
 	ESP::Paint();
+	RainbowModel::Paint();
 
 	for (const DrawRequest& value : Draw::drawRequests)
 	{

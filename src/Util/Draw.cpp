@@ -1,6 +1,7 @@
 #include "Draw.hpp"
 #include "../Interface.hpp"
 #include "Util.hpp"
+#include "../Hacks/ESP.hpp"
 
 std::deque<DrawRequest> Draw::drawRequests = {};
 
@@ -227,9 +228,8 @@ void Draw::ImCircle3D(Vec3 position, int segments, float radius, ImColor color)
 				position[2]);
 
 		ImVec2 start2d, end2d;
-		//TODO
-		//if (!ESP::WorldToScreen(start, &start2d) || !ESP::WorldToScreen(end, &end2d))
-			//continue;
+		if (!ESP::WorldToScreen(start, start2d) || !ESP::WorldToScreen(end, end2d))
+			continue;
 
 		Draw::ImLine(start2d, end2d, color);
 	}

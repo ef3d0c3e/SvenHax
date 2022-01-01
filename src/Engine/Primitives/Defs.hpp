@@ -18,5 +18,6 @@ typedef double f64;
 typedef i32 QBool;
 typedef i32 HSprite;
 typedef u32 StringT;
+typedef u32 CRC32;
 
 #endif // ENGINE_PRIMITIVES_DEFS_HPP

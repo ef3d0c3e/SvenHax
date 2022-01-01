@@ -7,7 +7,7 @@
 #include "Util/Symbol.hpp"
 #include "Engine/ClientDLL.hpp"
 #include "Engine/Engine.hpp"
-#include "Engine/EngineFuncs.hpp"
+#include "Engine/EngineExportedFuncs.hpp"
 
 extern CBaseFileSystem* fileSystem;
 extern CDedicatedServerAPI* dedicatedServer;
@@ -36,6 +36,8 @@ extern CServerBrowser* serverBrowser;
 extern CDefaultCvar* cvar;
 
 extern CEngine* engine;
+
+extern VMT* studioRendererVMT;
 
 namespace Interface
 {
