@@ -9,6 +9,8 @@
 
 struct Entity // cl_entity_s
 {
+	static constexpr std::size_t EntNum = 2048;
+
 	i32 index; // Index into cl_entities ( should match actual slot, but not necessarily )
 
 	QBool player; // True if this entity is a "player"

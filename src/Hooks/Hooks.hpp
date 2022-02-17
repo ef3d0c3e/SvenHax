@@ -4,6 +4,7 @@
 #include "../SDK/SDK.hpp"
 #include "../Interface.hpp"
 #include "../Engine/ClientDLL.hpp"
+#include <chrono>
 #include <vector>
 
 namespace Hooks
@@ -41,6 +42,7 @@ namespace SDL2
 {
 	extern int windowWidth;
 	extern int windowHeight;
+	extern std::chrono::time_point<std::chrono::high_resolution_clock> frameBegin;
 
 	void HookSwapWindow();
 	void UnhookWindow();
@@ -54,8 +56,7 @@ namespace StudioModelRenderer
 	i32 StudioDrawModel(CStudioModelRenderer* thisptr, i32 flags);
 	i32 StudioDrawPlayer(CStudioModelRenderer* thisptr, i32 flags, EntityState* player);
 	i32 StudioDrawMonster(CStudioModelRenderer* thisptr, i32 flags, Entity* monster);
-
-	extern std::vector<Entity*> monsterList;
+	void StudioRenderModel(CStudioModelRenderer* thisptr);
 }
 
 #endif // HOOKS_HOOKS_HPP

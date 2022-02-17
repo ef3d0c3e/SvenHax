@@ -2,6 +2,7 @@
 #include "../Util/Draw.hpp"
 #include "Hooks.hpp"
 
+#include "../Hacks/Info.hpp"
 #include "../Hacks/ESP.hpp"
 #include "../Hacks/RainbowModel.hpp"
 
@@ -21,6 +22,7 @@ void Hooks::PaintImGui()
 	float imHeight = SDL2::windowHeight;
 
 
+	Info::Paint();
 	ESP::Paint();
 	RainbowModel::Paint();
 

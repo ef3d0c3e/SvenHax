@@ -13,6 +13,7 @@
 #include "Util/Maps.hpp"
 #include "Interface.hpp"
 #include "Hooks/Hooks.hpp"
+#include "Hacks/Info.hpp"
 
 std::mutex mtx;
 std::condition_variable cv;
@@ -53,6 +54,8 @@ void MainThread()
 		SDL2::HookSwapWindow();
 		SDL2::HookPollEvent();
 		CreateMove::HookCreateMove();
+
+		Info::PopulateModelMap();
 		
 		console->DPrintf("SvenHax Successfully Loaded...\n");
 		fmt::print("EntityState = {}", sizeof(EntityState));

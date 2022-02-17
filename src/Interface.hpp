@@ -34,10 +34,11 @@ extern CRunGameEngine* gameEngine;
 extern CVGuiSystemModuleLoader* moduleLoader;
 extern CServerBrowser* serverBrowser;
 extern CDefaultCvar* cvar;
-
 extern CEngine* engine;
 
 extern VMT* studioRendererVMT;
+
+extern char* gSharedString;
 
 namespace Interface
 {

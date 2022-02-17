@@ -2,6 +2,8 @@
 #include "Tab.hpp"
 #include "../Engine/ClientDLL.hpp"
 
+#include "../Hacks/ESP.hpp"
+
 static void general_1()
 {
 	Child("##CONTENT1", 100);
@@ -9,8 +11,7 @@ static void general_1()
 	ImGui::Text("Third person: %d", (int)gClientDllFuncs->IsThirdPerson());
 
 	ImGui::Text("General1");
-	static bool v = false;
-	UI::Checkbox("aaa", &v);
+	UI::Checkbox("ESP", &Settings::ESP::enabled);
 
 	EndChild();
 

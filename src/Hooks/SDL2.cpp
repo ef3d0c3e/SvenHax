@@ -12,6 +12,7 @@
 #include "../Util/Util.hpp"
 #include "Hooks.hpp"
 #include <SDL2/SDL.h>
+#include <chrono>
 
 #define INCBIN_PREFIX res
 #include "../incbin/incbin.h"
@@ -24,6 +25,7 @@ INCBIN(MinecraftiaRegular, "../src/UI/Res/Minecraftia-Regular.ttf");
 
 int SDL2::windowWidth = 0;
 int SDL2::windowHeight = 0;
+std::chrono::time_point<std::chrono::high_resolution_clock> SDL2::frameBegin;
 ImFont* UI::plex = nullptr;
 ImFont* UI::plex_mono = nullptr;
 ImFont* UI::title_font = nullptr;
@@ -232,6 +234,8 @@ static void SwapWindow(SDL_Window* window)
 		SDL_ShowCursor(io.MouseDrawCursor ? 0 : 1);
 	}
 
+	SDL2::frameBegin = std::chrono::high_resolution_clock::now();
+
 	ImGui::NewFrame();
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
@@ -244,9 +248,6 @@ static void SwapWindow(SDL_Window* window)
 		ImGui::End();
 	}
 	ImGui::EndFrame();
-
-	StudioModelRenderer::monsterList.clear();
-	StudioModelRenderer::monsterList.reserve(1024);
 
 	ImGui::GetCurrentContext()->Font->DisplayOffset = ImVec2(0.f, 0.f);
 	ImGui::GetCurrentContext()->Font->DisplayOffset = ImVec2(0.0f, 0.0f);

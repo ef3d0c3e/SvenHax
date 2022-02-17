@@ -57,8 +57,8 @@ struct Model
 	i32 numleafs; // number of visible leafs, not counting 0
 	MLeaf* leafs;
 
-	i32 numvertexes;
-	MVertex* vertexes;
+	i32 numvertices;
+	MVertex* vertices;
 
 	i32 numedges;
 	MEdge* edges;

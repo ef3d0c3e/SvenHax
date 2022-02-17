@@ -46,9 +46,7 @@ CRunGameEngine* gameEngine = nullptr;
 CVGuiSystemModuleLoader* moduleLoader = nullptr;
 CServerBrowser* serverBrowser = nullptr;
 CDefaultCvar* cvar = nullptr;
-
 CEngine* engine = nullptr;
-CBasePlayer* gPlayerList = nullptr;
 
 ClientDLLFuncs* gClientDllFuncs = nullptr;
 EngineFuncs* gEngineFuncs = nullptr;
@@ -61,6 +59,9 @@ std::array<EDict, 257>* gEnt = nullptr;
 CStudioModelRenderer* gStudioRenderer = nullptr;
 
 VMT* studioRendererVMT = nullptr;
+
+char* gSharedString = nullptr;
+CBasePlayer* gPlayerList = nullptr;
 
 void Interface::FindSymbols()
 {
@@ -155,7 +156,7 @@ void Interface::FindInterfaces()
 	{
 		T* p = GetInterface<T>(filename, version, exact);
 		if (p == nullptr)
-			throw Exception("Interface::FindInterfaces() GetInterface<{0}> returned nullptr", type_name<T>());
+			throw Exception("Interface::FindInterfaces() GetInterface returned nullptr", type_name<T>());
 		//fmt::print(" * {0} = {1:p}\n", name, (void*)p);
 		return p;
 	};
@@ -311,6 +312,8 @@ void Interface::FindGlobals()
 	gEnt = reinterpret_cast<std::array<EDict, 257>*>(symbols["svencoop/cl_dlls/client.so"s]["ent"s]);
 
 	gStudioRenderer = reinterpret_cast<CStudioModelRenderer*>(symbols["svencoop/cl_dlls/client.so"s]["g_StudioRenderer"s]);
+
+	gSharedString = reinterpret_cast<char*>(symbols["hw.so"s]["DL_SharedVarArgs(char*, ...)::string"s]);
 }
 
 void Interface::HookVMs()
@@ -319,5 +322,6 @@ void Interface::HookVMs()
 	studioRendererVMT->HookVM(StudioModelRenderer::StudioDrawModel, 3);
 	studioRendererVMT->HookVM(StudioModelRenderer::StudioDrawPlayer, 4);
 	studioRendererVMT->HookVM(StudioModelRenderer::StudioDrawMonster, 5);
+	studioRendererVMT->HookVM(StudioModelRenderer::StudioRenderModel, 20);
 	studioRendererVMT->ApplyVMT();
 }

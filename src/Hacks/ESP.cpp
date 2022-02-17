@@ -4,10 +4,12 @@
 #include "../Engine/TempEnt.hpp"
 #include "../Util/Draw.hpp"
 #include "../Hooks/Hooks.hpp"
+#include "Info.hpp"
 
 namespace Settings::ESP
 {
 	bool enabled = true;
+	i32 maxDormantTime = 500;
 }
 
 bool ESP::WorldToScreen(const Vec3& point, ImVec2& screen)
@@ -29,8 +31,8 @@ static void DrawBox(const Entity& ent, const ImColor& color, Settings::ESP::BoxT
 		f32 left, top, right, bottom;
 
 		// Get the locations
-		const Vec3 min = ent.model->mins + ent.origin;
-		const Vec3 max = ent.model->maxs + ent.origin;
+		const Vec3 min = ent.baseline.mins + ent.origin;
+		const Vec3 max = ent.baseline.maxs + ent.origin;
 
 		// Points of a 3d bounding box
 		std::array<Vec3, 8> points = {
@@ -134,25 +136,29 @@ static void DrawBox(const Entity& ent, const ImColor& color, Settings::ESP::BoxT
 
 static void DrawEnemySkeleton(const EntVars& ent, std::size_t index, const ImColor& color)
 {
-	static const std::array<std::vector<i32>, Settings::ESP::EnemyEntity::size> bones{};
-	const Model* model = gStudioApi->GetModelByIndex(ent.modelIndex);
-	if (!model)
-		return;
+//	static const std::array<std::vector<i32>, Settings::ESP::EnemyEntity::size> bones{};
+//	const Model* model = gStudioApi->GetModelByIndex(ent.modelIndex);
+//	if (!model)
+//		return;
 }
 
-static void DrawEnemy(Entity& ent, std::size_t index)
+static void DrawEnemy(const Info::EntInfo& einfo)
 {
 	//DrawEnemySkeleton(ent, index, ImColor(0.f, 0.f, 1.f, 1.f));
-	if (ent.model)
+	if (einfo.ent.model)
 	{
-		DrawBox(ent, ImColor(0.5f, 1.f, 0.5f, 1.f), Settings::ESP::BOX_3D);
+		float dormant = (einfo.dormant)
+			? std::max(0.f,
+					std::chrono::duration<float, std::milli>(SDL2::frameBegin - einfo.lastUpdated).count()
+					/ Settings::ESP::maxDormantTime)
+			: 1.f;
+		DrawBox(einfo.ent, ImColor(0.5f, 1.f, 0.5f, dormant), Settings::ESP::BOX_2D);
 		ImVec2 pos;
-		if (ESP::WorldToScreen(ent.origin, pos))
+		if (ESP::WorldToScreen(einfo.ent.origin, pos))
 			return;
+
 		pos.y+=22;
-		Draw::ImText(pos, ImColor(1.f, 0.f, 1.f, 1.f), fmt::format("{0:p}", (const void*)&ent).c_str());
-		pos.y+=18;
-		Draw::ImText(pos, ImColor(1.f, 0.f, 1.f, 1.f), fmt::format("{0:p}", (const void*)ent.model).c_str());
+		Draw::ImText(pos, ImColor(1.f, 0.f, 1.f, dormant), einfo.GetClassName().c_str());
 	}
 }
 
@@ -169,111 +175,13 @@ void ESP::Paint()
 	if (!gameEngine->IsInGame())
 		return;
 
-	/*
-	for (const Entity* ent : StudioModelRenderer::monsterList)
+	for (const auto& [id, einfo] : Info::entityInfo)
 	{
-		ImVec2 pos;
-		if (ESP::WorldToScreen(ent->origin, pos))
+		if (einfo.GetClassFlags() & Info::ClassFlags::DEAD_BODY)
 			continue;
-		std::cout << (const void*)ent << std::endl;
-		DrawBox(*ent, ImColor(0.5f, 1.f, 0.5f, 1.f), Settings::ESP::BOX_3D);
-		Draw::ImText(pos, ImColor(0.f, 0.f, 1.f, 1.f), std::to_string(ent->index).c_str());
-		pos.y+=18;
-		Draw::ImText(pos, ImColor(1.f, 0.f, 1.f, 1.f), fmt::format("{0:p}", (const void*)ent).c_str());
-		pos.y+=18;
-		Draw::ImText(pos, ImColor(1.f, 0.f, 1.f, 1.f), fmt::format("{0:p}", (const void*)ent->model).c_str());
+		if (einfo.GetClassFlags() & Info::ClassFlags::ENEMY)
+			DrawEnemy(einfo);
 	}
-	*/
-
-	const Entity* localplayer = gEngineFuncs->GetLocalPlayer();
-	for (std::size_t i = 2; i < 2048; ++i) // 0 = world
-	{
-		Entity* ent = gEngineFuncs->GetEntityByIndex(i);
-		if (!ent || ent == localplayer)
-			continue;
-		DrawEnemy(*ent, 0);
-	}
-
-	//for (std::size_t i = 0; i < gPMove->numVisEnt; ++i)
-	//{
-	//	const PhysEnt& ent = gPMove->visEnts[i];
-
-	//	ImVec2 pos;
-	//	if (ESP::WorldToScreen(ent.origin, pos))
-	//		continue;
-	//	Draw::ImText(pos, ImColor(0.f, 0.f, 1.f, 1.f), std::to_string(ent.classnumber).c_str());
-	//}
-
-	// Serverside
-	//for (std::size_t i = 0; i < EDictEntsNum; ++i)
-	//{
-	//	std::cout << "maybe nnull" << std::endl;
-	//	const EDict* dict = gExportedFuncs->EntityOfEntIndex(i);
-	//	if (dict == nullptr)
-	//		continue;
-	//	std::cout << "not nnull" << std::endl;
- 
-	//	ImVec2 pos;
-	//	if (ESP::WorldToScreen(dict->vars.origin, pos))
-	//		continue;
-	//	Draw::ImText(pos, ImColor(0.f, 0.f, 1.f, 1.f), std::to_string(dict->vars.className).c_str());
-	//	pos.y += 18;
-	//	Draw::ImText(pos, ImColor(0.f, 0.f, 1.f, 1.f), fmt::format("{0:p}", (void*)&dict->vars).c_str());
-	//}
-
-	//	auto isInList = []<std::size_t N>(const std::array<std::string_view, N>& list, const char* name, std::size_t len)
-	//	{
-	//		for (std::size_t i = 0 ; i < N; ++i)
-	//		{
-	//			if (len != list[i].size())
-	//				continue;
-	//			if (strncmp(list[i].data(), name, list[i].size()) == 0)
-	//				return i;
-	//		}
-
-	//		return std::size_t(-1);
-	//	};
-
-	//	const char* className = gExportedFuncs->StringFromIndex(dict->vars.className);
-	//	const std::size_t classNameLen = strlen(className);
-	//	if (classNameLen > 8 && strncmp(className, "monster_", 8) == 0) // 'monster_'
-	//	{
-	//		const auto i = isInList(Settings::ESP::EnemyEntityClass, &className[8], classNameLen-8);
-	//		if (i == std::size_t(-1))
-	//		{
-	//			fmt::print("ESP::Paint() : unknown monster `{}`\n", className);
-	//			continue;
-	//		}
-	//		DrawEnemy(dict->vars, i);
-	//	}
-	//	else if (classNameLen == 6 && strncmp(className, "player", 6) == 0) // 'player'
-	//	{
-	//		DrawPlayer(dict->vars);
-	//	}
-
-
-	//	/*
-	//	if (strncmp("monster_", className, 8) == 0)
-	//		DrawMonster(dict->vars);
-	//	else if (strncmp("weapon_", className, 5) == 0)
-	//		DrawWeapon(dict->vars);
-	//	else if (strncmp("ammo_", className, 5) == 0)
-	//		DrawAmmo(dict->vars);
-	//	else if (strncmp("item_", className, 5) == 0)
-	//		DrawItem(dict->vars);
-	//	else if (strncmp("player", className, 6) == 0)
-	//		DrawPlayer(dict->vars);
-	//	else if (strncmp("env_", className, 4) == 0)
-	//		continue;
-
-	//	{
-	//		if (WorldToScreen(dict->vars.origin, pos))
-	//			continue;
-	//		auto&& [x, y] = pos;
-	//		Draw::ImText(ImVec2(x, y-20), ImColor(0.f, 1.f, 0.f, 1.f),  className);
-	//	}
-	//	*/
-	//}
 }
 
 

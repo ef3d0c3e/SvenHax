@@ -1,6 +1,5 @@
 #include "Hooks.hpp"
-
-std::vector<Entity*> StudioModelRenderer::monsterList;
+#include "../Hacks/Chams.hpp"
 
 i32 StudioModelRenderer::StudioDrawModel(CStudioModelRenderer* thisptr, i32 flags)
 {
@@ -14,6 +13,14 @@ i32 StudioModelRenderer::StudioDrawPlayer(CStudioModelRenderer* thisptr, i32 fla
 
 i32 StudioModelRenderer::StudioDrawMonster(CStudioModelRenderer* thisptr, i32 flags, Entity* monster)
 {
-	monsterList.push_back(monster);
 	return studioRendererVMT->GetOriginalMethod<i32(*)(CStudioModelRenderer*, i32, Entity*)>(5)(thisptr, flags, monster);
+}
+
+void StudioModelRenderer::StudioRenderModel(CStudioModelRenderer* thisptr)
+{
+	bool handled = false;
+	handled = Chams::StudioRenderModel();
+
+	if (!handled)
+		studioRendererVMT->GetOriginalMethod<void(*)(CStudioModelRenderer*)>(20)(thisptr);
 }
