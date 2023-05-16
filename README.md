@@ -1,5 +1,5 @@
 # SvenHax -- Sven Co-Op hack for GNU/Linux
-![showcase](svenhax.png)
+**Note**: This is a dead project that only ever featured bhop and antiaim.
 
 ## Goals
  * Getting the SDL input hook to work seamlessly
